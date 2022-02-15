@@ -24,6 +24,8 @@ import org.apache.shardingsphere.spi.TypeBasedSPI;
  *
  * @author zhangliang
  * @author panjuan
+ *
+ * 分布式主键实现方案
  */
 public interface ShardingKeyGenerator extends TypeBasedSPI {
     

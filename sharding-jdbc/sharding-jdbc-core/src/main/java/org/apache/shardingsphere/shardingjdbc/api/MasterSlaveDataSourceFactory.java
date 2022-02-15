@@ -33,6 +33,8 @@ import java.util.Properties;
  * 
  * @author zhangliang
  * @author panjuan
+ *
+ *  配置读写分离
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MasterSlaveDataSourceFactory {
@@ -45,6 +47,8 @@ public final class MasterSlaveDataSourceFactory {
      * @param props props
      * @return master-slave data source
      * @throws SQLException SQL exception
+     *
+     *  读写分离信息 {@link MasterSlaveRuleConfiguration}
      */
     public static DataSource createDataSource(final Map<String, DataSource> dataSourceMap, final MasterSlaveRuleConfiguration masterSlaveRuleConfig, final Properties props) throws SQLException {
         return new MasterSlaveDataSource(dataSourceMap, new MasterSlaveRule(masterSlaveRuleConfig), props);

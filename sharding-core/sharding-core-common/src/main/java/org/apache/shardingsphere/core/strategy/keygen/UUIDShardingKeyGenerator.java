@@ -28,6 +28,8 @@ import java.util.UUID;
  * UUID key generator.
  *
  * @author panjuan
+ *
+ *  UUID 生成算法
  */
 @Getter
 @Setter

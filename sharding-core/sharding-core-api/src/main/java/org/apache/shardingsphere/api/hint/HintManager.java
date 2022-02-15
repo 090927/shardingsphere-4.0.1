@@ -32,24 +32,35 @@ import java.util.Collections;
  * @author gaohongtao
  * @author zhangliang
  * @author panjun
+ *
+ *  强制路由
+ *
+ *   `AutoCloseable` 接口，在 JDK7，引入的新接口，用于自动释放资源。
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class HintManager implements AutoCloseable {
-    
+
+    // 基于ThreadLocal存储 HintManager 实例
     private static final ThreadLocal<HintManager> HINT_MANAGER_HOLDER = new ThreadLocal<>();
-    
+
+    // 数据库分片值
     private final Multimap<String, Comparable<?>> databaseShardingValues = HashMultimap.create();
-    
+
+    // 数据表分片值
     private final Multimap<String, Comparable<?>> tableShardingValues = HashMultimap.create();
-    
+
+    // 是否只有数据库分片
     private boolean databaseShardingOnly;
-    
+
+    // 是否只路由主库
     private boolean masterRouteOnly;
     
     /**
      * Get a new instance for {@code HintManager}.
      *
      * @return  {@code HintManager} instance
+     *
+     *  从 ThreadLocal 中获取或设置针对当前线程的 HintManager 实例。
      */
     public static HintManager getInstance() {
         Preconditions.checkState(null == HINT_MANAGER_HOLDER.get(), "Hint has previous value, please clear first.");
@@ -160,6 +171,8 @@ public final class HintManager implements AutoCloseable {
     
     /**
      * Clear threadlocal for hint manager.
+     *
+     *  进行资源的释放
      */
     public static void clear() {
         HINT_MANAGER_HOLDER.remove();

@@ -28,19 +28,28 @@ import org.apache.shardingsphere.api.config.sharding.strategy.ShardingStrategyCo
  * 
  * @author zhangliang
  * @author panjuan
+ *
+ *  表分片规则配置
+ *
+ *  对应 Yaml 配置体系 {@link org.apache.shardingsphere.core.yaml.config.sharding.YamlShardingRuleConfiguration }
  */
 @Getter
 @Setter
 public final class TableRuleConfiguration {
-    
+
+    //逻辑表
     private final String logicTable;
-    
+
+    // 代表真实的数据节点，由数据源名+表名组成，支持行表达式。例如，"ds${0..1}.user${0..1}"就是比较典型的一种配置方式
     private final String actualDataNodes;
-    
+
+    // 代表分库策略，如果不设置，则使用默认分库策略，这里的默认分库策略就是 ShardingRuleConfiguration 中的 defaultDatabaseShardingStrategyConfig 配置
     private ShardingStrategyConfiguration databaseShardingStrategyConfig;
-    
+
+    // 代表分表策略。如果不设置，也会使用默认分表策略。
     private ShardingStrategyConfiguration tableShardingStrategyConfig;
-    
+
+    // 分布式环境，自增生成器配置，「 集成 雪花算法 」
     private KeyGeneratorConfiguration keyGeneratorConfig;
     
     public TableRuleConfiguration(final String logicTable) {

@@ -38,6 +38,8 @@ public interface HintShardingAlgorithm<T extends Comparable<?>> extends Sharding
      * @param availableTargetNames available data sources or tables's names
      * @param shardingValue sharding value
      * @return sharding result for data sources or tables's names
+     *
+     *  根据 Hint 信息执行分片
      */
     Collection<String> doSharding(Collection<String> availableTargetNames, HintShardingValue<T> shardingValue);
 }

@@ -31,7 +31,12 @@ import java.util.Properties;
  */
 @Getter
 public final class KeyGeneratorConfiguration extends TypeBasedSPIConfiguration {
-    
+
+    /**
+     * 首先，指定一个列名。
+     *
+     *  利用 Properties 配置项，指定自增值生成过程中所需要属性。
+     */
     private final String column;
     
     public KeyGeneratorConfiguration(final String type, final String column) {
@@ -39,7 +44,7 @@ public final class KeyGeneratorConfiguration extends TypeBasedSPIConfiguration {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(column), "Column is required.");
         this.column = column;
     }
-    
+
     public KeyGeneratorConfiguration(final String type, final String column, final Properties properties) {
         super(type, properties);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(column), "Column is required.");

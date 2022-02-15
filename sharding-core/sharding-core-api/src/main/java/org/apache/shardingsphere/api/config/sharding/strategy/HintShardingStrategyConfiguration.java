@@ -28,7 +28,10 @@ import org.apache.shardingsphere.api.sharding.hint.HintShardingAlgorithm;
  */
 @Getter
 public final class HintShardingStrategyConfiguration implements ShardingStrategyConfiguration {
-    
+
+    /*
+     * 根据 Hint 信息执行分片
+     */
     private final HintShardingAlgorithm shardingAlgorithm;
     
     public HintShardingStrategyConfiguration(final HintShardingAlgorithm shardingAlgorithm) {

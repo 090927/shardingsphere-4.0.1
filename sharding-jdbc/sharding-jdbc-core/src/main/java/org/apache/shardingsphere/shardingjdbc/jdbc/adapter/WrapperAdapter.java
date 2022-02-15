@@ -27,6 +27,8 @@ import java.util.Collection;
 
 /**
  * Adapter for {@code java.sql.Wrapper}.
+ *
+ *  包装器适配类
  * 
  * @author zhangliang
  */
@@ -55,6 +57,8 @@ public abstract class WrapperAdapter implements Wrapper {
      * @param methodName method name
      * @param argumentTypes argument types
      * @param arguments arguments
+     *
+     *  记录方法调用
      */
     @SneakyThrows
     public final void recordMethodInvocation(final Class<?> targetClass, final String methodName, final Class<?>[] argumentTypes, final Object[] arguments) {
@@ -65,6 +69,7 @@ public abstract class WrapperAdapter implements Wrapper {
      * Replay methods invocation.
      * 
      * @param target target object
+     *               重放方法调用， 通过反射技术执行。
      */
     public final void replayMethodsInvocation(final Object target) {
         for (JdbcMethodInvocation each : jdbcMethodInvocations) {

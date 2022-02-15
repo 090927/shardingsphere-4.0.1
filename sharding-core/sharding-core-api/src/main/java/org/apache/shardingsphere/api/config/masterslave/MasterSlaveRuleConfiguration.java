@@ -31,13 +31,17 @@ import java.util.List;
  */
 @Getter
 public class MasterSlaveRuleConfiguration implements RuleConfiguration {
-    
+
+    // 读写分离数据源名称
     private final String name;
-    
+
+    // 主库数据源名称
     private final String masterDataSourceName;
-    
+
+    // 从库数据源名称列表
     private final List<String> slaveDataSourceNames;
-    
+
+    // 从库负载均衡算法
     private final LoadBalanceStrategyConfiguration loadBalanceStrategyConfiguration;
     
     public MasterSlaveRuleConfiguration(final String name, final String masterDataSourceName, final List<String> slaveDataSourceNames) {

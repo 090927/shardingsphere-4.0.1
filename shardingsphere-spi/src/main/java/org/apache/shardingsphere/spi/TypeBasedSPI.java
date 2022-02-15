@@ -28,21 +28,24 @@ public interface TypeBasedSPI {
     
     /**
      * Get algorithm type.
-     * 
+     * 获取SPI对应的类型
+     *
      * @return type
      */
     String getType();
-    
+
     /**
      * Get properties.
-     * 
+     * 获取属性
+     *
      * @return properties of algorithm
      */
     Properties getProperties();
-    
+
     /**
      * Set properties.
-     * 
+     * 设置属性
+     *
      * @param properties properties of algorithm
      */
     void setProperties(Properties properties);

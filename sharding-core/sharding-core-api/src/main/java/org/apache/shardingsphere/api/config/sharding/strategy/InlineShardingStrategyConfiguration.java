@@ -28,9 +28,11 @@ import lombok.Getter;
  */
 @Getter
 public final class InlineShardingStrategyConfiguration implements ShardingStrategyConfiguration {
-    
+
+    // 指定分片列-名称
     private final String shardingColumn;
-    
+
+    // 指定分片算法表达式
     private final String algorithmExpression;
     
     public InlineShardingStrategyConfiguration(final String shardingColumn, final String algorithmExpression) {

@@ -29,7 +29,9 @@ import java.util.Properties;
 
 /**
  * Encrypt data source factory.
- * 
+ *
+ *  配置数据脱敏
+ *
  * @author panjuan
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -43,6 +45,8 @@ public final class EncryptDataSourceFactory {
      * @param props properties
      * @return encrypt data source
      * @throws SQLException SQL exception
+     *
+     *  配置类 {@link EncryptRuleConfiguration}
      */
     public static DataSource createDataSource(final DataSource dataSource, final EncryptRuleConfiguration encryptRuleConfiguration, final Properties props) throws SQLException {
         return new EncryptDataSource(dataSource, new EncryptRule(encryptRuleConfiguration), props);

@@ -23,16 +23,22 @@ import org.apache.shardingsphere.spi.TypeBasedSPI;
  * Sharding encryptor.
  *
  * @author panjuan
+ *
+ *  实现类
+ *   aes {@link org.apache.shardingsphere.core.strategy.encrypt.impl.AESShardingEncryptor}
+ *   mdb {@link org.apache.shardingsphere.core.strategy.encrypt.impl.MD5ShardingEncryptor}
  */
 public interface ShardingEncryptor extends TypeBasedSPI {
     
     /**
      * Initialize.
+     * 初始化
      */
     void init();
     
     /**
      * Encode.
+     * 加密
      * 
      * @param plaintext plaintext
      * @return ciphertext
@@ -41,6 +47,7 @@ public interface ShardingEncryptor extends TypeBasedSPI {
     
     /**
      * Decode.
+     * 解密
      * 
      * @param ciphertext ciphertext
      * @return plaintext

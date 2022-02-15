@@ -32,9 +32,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Getter
 public final class EncryptRuleConfiguration implements RuleConfiguration {
-    
+
+    // 加解密器配置列表
     private final Map<String, EncryptorRuleConfiguration> encryptors;
-    
+
+    // 加密表配置列表
     private final Map<String, EncryptTableRuleConfiguration> tables;
     
     public EncryptRuleConfiguration() {

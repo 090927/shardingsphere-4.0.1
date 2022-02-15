@@ -247,7 +247,11 @@ public abstract class AbstractConnectionAdapter extends AbstractUnsupportedOpera
     @Override
     public final void setReadOnly(final boolean readOnly) throws SQLException {
         this.readOnly = readOnly;
+
+        // 调用 recordMethodInvocation 方法记录方法调用的元数据
         recordMethodInvocation(Connection.class, "setReadOnly", new Class[]{boolean.class}, new Object[]{readOnly});
+
+        //执行回调
         forceExecuteTemplate.execute(cachedConnections.values(), new ForceExecuteCallback<Connection>() {
             
             @Override

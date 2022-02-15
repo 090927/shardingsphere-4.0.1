@@ -23,4 +23,12 @@ package org.apache.shardingsphere.api.config.sharding.strategy;
  * @author zhangliang
  */
 public interface ShardingStrategyConfiguration {
+
+    /**
+     *
+     * 分配策略
+     *
+     *  1、直接使用数据库的 Hint 机制实现 ‘强制路由‘ {@link  HintShardingStrategyConfiguration}
+     *  2、基于 `行表达式` {@link InlineShardingStrategyConfiguration}
+     */
 }

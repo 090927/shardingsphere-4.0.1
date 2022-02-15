@@ -44,6 +44,8 @@ public final class NewInstanceServiceLoader {
      *
      * @param service service type
      * @param <T> type of service
+     *
+     *   通过 'ServiceLoader' 获取新的 'SPI' 服务实例并注册到 'SERVICE_MAP' 中
      */
     public static <T> void register(final Class<T> service) {
         for (T each : ServiceLoader.load(service)) {
