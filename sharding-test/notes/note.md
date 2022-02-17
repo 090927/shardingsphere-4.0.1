@@ -6,3 +6,8 @@
 - 分布式主键生成方案 `ShardingKeyGenerator`
   1. 雪花算法那
   2. UUID
+  
+> 分片引擎
+
+- SQL 解析引擎 （使用外观模式）
+  - `SQLParseEngine` 核心类，同时委托 `SQLParseKernel`

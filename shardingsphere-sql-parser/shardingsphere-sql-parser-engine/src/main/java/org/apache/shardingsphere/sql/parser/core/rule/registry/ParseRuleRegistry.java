@@ -45,18 +45,35 @@ import java.util.Map;
 public final class ParseRuleRegistry {
     
     private static volatile ParseRuleRegistry instance;
-    
+
+    /**
+     * ExtractorRule 针对各个数据库差异，定义提取规则
+     */
     private final ExtractorRuleDefinitionEntityLoader extractorRuleLoader = new ExtractorRuleDefinitionEntityLoader();
-    
+
+    /**
+     * FillerRule 规则定义加载
+     */
     private final FillerRuleDefinitionEntityLoader fillerRuleLoader = new FillerRuleDefinitionEntityLoader();
-    
+
+    /**
+     * SQLStatementRule 规则定义加载
+     */
     private final SQLStatementRuleDefinitionEntityLoader statementRuleLoader = new SQLStatementRuleDefinitionEntityLoader();
-    
+
+    /**
+     * 存放，FillerRuleDefinition 过滤规则定义
+     */
     private final Map<String, FillerRuleDefinition> fillerRuleDefinitions = new HashMap<>();
-    
+
+    /**
+     * 存放，SQLStatementRuleDefinition 规则定义
+     */
     private final Map<String, SQLStatementRuleDefinition> sqlStatementRuleDefinitions = new HashMap<>();
     
     static {
+
+        // SPI 加载机制
         NewInstanceServiceLoader.register(SQLParserEntry.class);
         instance = new ParseRuleRegistry();
     }
@@ -64,23 +81,47 @@ public final class ParseRuleRegistry {
     private ParseRuleRegistry() {
         initParseRuleDefinition();
     }
-    
+
+    /**
+     * 初始化，规则定义加载
+     *  1、extractor-rule-definition.xml  [ 提取SQLSegment]
+     *  2、filler-rule-definition.xml   [ 填充SQL]
+     *  3、sql-statement-rule-definition.xml  [解析语法树]
+     */
     private void initParseRuleDefinition() {
         ExtractorRuleDefinitionEntity generalExtractorRuleEntity = extractorRuleLoader.load(RuleDefinitionFileConstant.getExtractorRuleDefinitionFile());
         FillerRuleDefinitionEntity generalFillerRuleEntity = fillerRuleLoader.load(RuleDefinitionFileConstant.getFillerRuleDefinitionFile());
         for (SQLParserEntry each : NewInstanceServiceLoader.newServiceInstances(SQLParserEntry.class)) {
             String databaseTypeName = each.getDatabaseTypeName();
+
+            /**
+             *  过滤规则定义加载 {@link #createFillerRuleDefinition(FillerRuleDefinitionEntity, String)}
+             */
             fillerRuleDefinitions.put(databaseTypeName, createFillerRuleDefinition(generalFillerRuleEntity, databaseTypeName));
+
+            /**
+             * SQLStatementRule 规则定义加载 {@link #createSQLStatementRuleDefinition(ExtractorRuleDefinitionEntity, String)}
+             */
             sqlStatementRuleDefinitions.put(databaseTypeName, createSQLStatementRuleDefinition(generalExtractorRuleEntity, databaseTypeName));
         }
     }
-    
+
     private FillerRuleDefinition createFillerRuleDefinition(final FillerRuleDefinitionEntity generalFillerRuleEntity, final String databaseTypeName) {
+
+        /**
+         * 加载文件 `filler-rule-definition.xml`
+         */
         FillerRuleDefinitionEntity databaseDialectFillerRuleEntity = fillerRuleLoader.load(RuleDefinitionFileConstant.getFillerRuleDefinitionFile(databaseTypeName));
         return new FillerRuleDefinition(generalFillerRuleEntity, databaseDialectFillerRuleEntity);
     }
     
     private SQLStatementRuleDefinition createSQLStatementRuleDefinition(final ExtractorRuleDefinitionEntity generalExtractorRuleEntity, final String databaseTypeName) {
+
+        /**
+         * 加载文件 `sql-statement-rule-definition.xml`
+         *
+         *   规则定义格式 [<sql-statement-rule context="select" sql-statement-class="org.apache.shardingsphere.sql.parser.sql.statement.dml.SelectStatement" extractor-rule-refs="tableReferences, columns, selectItems, where, predicate, groupBy, orderBy, limit, subqueryPredicate, lock" />]
+         */
         ExtractorRuleDefinitionEntity databaseDialectExtractorRuleEntity = extractorRuleLoader.load(RuleDefinitionFileConstant.getExtractorRuleDefinitionFile(databaseTypeName));
         ExtractorRuleDefinition extractorRuleDefinition = new ExtractorRuleDefinition(generalExtractorRuleEntity, databaseDialectExtractorRuleEntity);
         return new SQLStatementRuleDefinition(statementRuleLoader.load(RuleDefinitionFileConstant.getSQLStatementRuleDefinitionFile(databaseTypeName)), extractorRuleDefinition);

@@ -33,12 +33,17 @@ import java.util.LinkedList;
  * SQL statement rule.
  *
  * @author zhangliang
+ *
+ * 作为解析引擎最终产物的 SQLStatement ，实际上封装的是对 SQL 片段对象 SQLSegment 的获取操作
+ *
+ *   shardingsphere 存在大量 {@link SQLStatement}
+ *     包括，查询选择项、表信息（Table）、排序信息（OrderBy）、分组信息(GroupBy)
  */
 @Getter
 public final class SQLStatementRule {
     
     private final String contextName;
-    
+
     private final Class<? extends SQLStatement> sqlStatementClass;
     
     private final Collection<SQLSegmentExtractor> extractors;

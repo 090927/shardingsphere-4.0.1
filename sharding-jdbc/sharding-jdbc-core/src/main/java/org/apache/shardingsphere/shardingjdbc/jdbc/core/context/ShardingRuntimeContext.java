@@ -54,8 +54,16 @@ public final class ShardingRuntimeContext extends AbstractRuntimeContext<Shardin
     private final ShardingSphereMetaData metaData;
     
     private final ShardingTransactionManagerEngine shardingTransactionManagerEngine;
-    
+
+
+    /**
+     *   `ShardingDataSource` 构造函数  {@link org.apache.shardingsphere.shardingjdbc.jdbc.core.datasource.ShardingDataSource}
+     */
     public ShardingRuntimeContext(final Map<String, DataSource> dataSourceMap, final ShardingRule rule, final Properties props, final DatabaseType databaseType) throws SQLException {
+
+        /**
+         * 构造函数, 初始化 SQL解析引擎 {@link AbstractRuntimeContext
+         */
         super(rule, props, databaseType);
         cachedDatabaseMetaData = createCachedDatabaseMetaData(dataSourceMap, rule);
         metaData = createMetaData(dataSourceMap, rule, databaseType);

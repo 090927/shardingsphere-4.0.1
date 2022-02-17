@@ -33,6 +33,8 @@ public interface SQLStatement {
      * Get count of parameters.
      *
      * @return count of parameters
+     *
+     * 获取参数个数
      */
     int getParametersCount();
     
@@ -40,6 +42,8 @@ public interface SQLStatement {
      * Get all SQL segments.
      * 
      * @return all SQL segments
+     *
+     *  获取所有SQLSegment
      */
     Collection<SQLSegment> getAllSQLSegments();
     
@@ -49,6 +53,8 @@ public interface SQLStatement {
      * @param sqlSegmentType SQL segment type
      * @param <T> type of SQL segment
      * @return SQL segment
+     *
+     *  根据类型获取一个SQLSegment
      */
     <T extends SQLSegment> Optional<T> findSQLSegment(Class<T> sqlSegmentType);
     
@@ -58,6 +64,8 @@ public interface SQLStatement {
      * @param sqlSegmentType SQL segment type
      * @param <T> type of SQL segment
      * @return SQL segments
+     *
+     *  根据类型获取一组SQLSegment
      */
     <T extends SQLSegment> Collection<T> findSQLSegments(Class<T> sqlSegmentType);
 }

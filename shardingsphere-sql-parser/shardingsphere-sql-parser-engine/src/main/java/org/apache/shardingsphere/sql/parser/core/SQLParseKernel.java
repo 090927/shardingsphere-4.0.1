@@ -23,6 +23,7 @@ import org.apache.shardingsphere.sql.parser.core.filler.SQLStatementFillerEngine
 import org.apache.shardingsphere.sql.parser.core.parser.SQLAST;
 import org.apache.shardingsphere.sql.parser.core.parser.SQLParserEngine;
 import org.apache.shardingsphere.sql.parser.core.rule.registry.ParseRuleRegistry;
+import org.apache.shardingsphere.sql.parser.core.rule.registry.statement.SQLStatementRule;
 import org.apache.shardingsphere.sql.parser.sql.segment.SQLSegment;
 import org.apache.shardingsphere.sql.parser.sql.statement.SQLStatement;
 
@@ -34,13 +35,18 @@ import java.util.Map;
  *
  * @author duhongjun
  * @author zhangliang
+ *
+ *  sql
  */
 public final class SQLParseKernel {
-    
+
+    // SQL解析器引擎
     private final SQLParserEngine parserEngine;
-    
+
+    // SQLSegment 提取器引擎
     private final SQLSegmentsExtractorEngine extractorEngine;
-    
+
+    // SQLStatement 填充器引擎
     private final SQLStatementFillerEngine fillerEngine;
     
     public SQLParseKernel(final ParseRuleRegistry parseRuleRegistry, final String databaseTypeName, final String sql) {
@@ -55,9 +61,21 @@ public final class SQLParseKernel {
      * @return SQL statement
      */
     public SQLStatement parse() {
+
+        /**
+         * 利用 ANTLR4 解析 SQL 抽象语法树 {@link SQLParserEngine#parse()}
+         */
         SQLAST ast = parserEngine.parse();
+
+        /**
+         * 提取 AST 中 Token，封装对应 TableSegment、IndexSegment {@link SQLSegmentsExtractorEngine#extract(SQLAST)}
+         */
         Collection<SQLSegment> sqlSegments = extractorEngine.extract(ast);
         Map<ParserRuleContext, Integer> parameterMarkerIndexes = ast.getParameterMarkerIndexes();
+
+        /**
+         * 填充 SQLStatement 并返回 {@link SQLStatementFillerEngine#fill(Collection, int, SQLStatementRule)}
+         */
         return fillerEngine.fill(sqlSegments, parameterMarkerIndexes.size(), ast.getSqlStatementRule());
     }
 }

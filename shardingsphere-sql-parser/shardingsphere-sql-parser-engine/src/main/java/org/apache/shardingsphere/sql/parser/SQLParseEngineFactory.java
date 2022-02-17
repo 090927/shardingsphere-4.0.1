@@ -27,6 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * SQL parse engine factory.
  *
  * @author zhangliang
+ *
+ * SQL 解析引擎,工厂类
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SQLParseEngineFactory {
@@ -38,8 +40,12 @@ public final class SQLParseEngineFactory {
      *
      * @param databaseTypeName name of database type
      * @return SQL parse engine
+     *
+     *  基于数据类类型，获取 SQL解析引擎
      */
     public static SQLParseEngine getSQLParseEngine(final String databaseTypeName) {
+
+        // 如果缓存中包含了指定数据库类型对应的 SQLParseEngine，则直接返回
         if (ENGINES.containsKey(databaseTypeName)) {
             return ENGINES.get(databaseTypeName);
         }
@@ -47,7 +53,13 @@ public final class SQLParseEngineFactory {
             if (ENGINES.containsKey(databaseTypeName)) {
                 return ENGINES.get(databaseTypeName);
             }
+
+            /**
+             * 创建 SQLParseEngine {@link SQLParseEngine
+             */
             SQLParseEngine result = new SQLParseEngine(databaseTypeName);
+
+            // 将新创建的 SQLParseEngine 放入缓存中
             ENGINES.put(databaseTypeName, result);
             return result;
         }

@@ -36,6 +36,8 @@ public final class TableFiller implements SQLSegmentFiller<TableSegment> {
     public void fill(final TableSegment sqlSegment, final SQLStatement sqlStatement) {
         if (sqlStatement instanceof TableSegmentAvailable) {
             ((TableSegmentAvailable) sqlStatement).setTable(sqlSegment);
+
+            // 采用回调机制，完成对象的注入。
         } else if (sqlStatement instanceof TableSegmentsAvailable) {
             ((TableSegmentsAvailable) sqlStatement).getTables().add(sqlSegment);
         }

@@ -50,17 +50,39 @@ public final class SQLStatementFillerEngine {
      * @param parameterMarkerCount parameter marker count
      * @param rule SQL statement rule
      * @return SQL statement
+     *
+     *  填充SQL 语句（ SQL 解析第三步）
+     *    基于 `filler-rule-definition.xml` 配置文件。
+     *       这里保存，SQLSegment 和 SQLSegmentFiller 之间的对应关系
      */
     @SuppressWarnings("unchecked")
     @SneakyThrows
     public SQLStatement fill(final Collection<SQLSegment> sqlSegments, final int parameterMarkerCount, final SQLStatementRule rule) {
+
+        // 从 SQLStatementRule 中获取 SQLStatement 实例，如 CreateTableStatement
         SQLStatement result = rule.getSqlStatementClass().newInstance();
+
+        // 通过断言对SQLStatement的合法性进行校验
         Preconditions.checkArgument(result instanceof AbstractSQLStatement, "%s must extends AbstractSQLStatement", result.getClass().getName());
+
+        // 设置参数个数
         ((AbstractSQLStatement) result).setParametersCount(parameterMarkerCount);
+
+        // 添加所有的 SQLSegment 到 SQLStatement 中
         result.getAllSQLSegments().addAll(sqlSegments);
+
+        // 遍历填充对应类型的 SQLSegment
         for (SQLSegment each : sqlSegments) {
+
+            /**
+             * 根据数据库类型和 SQLSegment 找到对应 SQLSegmentFiller，并为 SQLStatement 填充 SQLSegment
+             *   {@link ParseRuleRegistry#findSQLSegmentFiller(String, Class)}
+             */
             Optional<SQLSegmentFiller> filler = parseRuleRegistry.findSQLSegmentFiller(databaseTypeName, each.getClass());
             if (filler.isPresent()) {
+                /**
+                 *  以 TableFiller 为例 {@link org.apache.shardingsphere.sql.parser.core.filler.impl.TableFiller
+                 */
                 filler.get().fill(each, result);
             }
         }

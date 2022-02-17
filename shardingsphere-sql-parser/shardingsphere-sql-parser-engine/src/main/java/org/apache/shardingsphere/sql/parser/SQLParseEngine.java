@@ -30,6 +30,8 @@ import org.apache.shardingsphere.sql.parser.sql.statement.SQLStatement;
  * SQL parse engine.
  *
  * @author zhangliang
+ *
+ *  SQL 解析
  */
 @RequiredArgsConstructor
 public final class SQLParseEngine {
@@ -46,9 +48,17 @@ public final class SQLParseEngine {
      * @return SQL statement
      */
     public SQLStatement parse(final String sql, final boolean useCache) {
+
+        /**
+         * 基于 ‘Hook‘ 机制进行监控和跟踪 {@link SPIParsingHook
+         */
         ParsingHook parsingHook = new SPIParsingHook();
         parsingHook.start(sql);
         try {
+
+            /**
+             * 完成 SQL 解析，并返回一个 SQLStatement {@link #parse0(String, boolean)}
+             */
             SQLStatement result = parse0(sql, useCache);
             parsingHook.finishSuccess(result);
             return result;
@@ -61,12 +71,21 @@ public final class SQLParseEngine {
     }
     
     private SQLStatement parse0(final String sql, final boolean useCache) {
+
+        // 如果使用缓存，先尝试从缓存中，获取 SQLStatement
         if (useCache) {
+            /**
+             * 基于 guava 实现本地缓存 {@link SQLParseResultCache#getSQLStatement(String)}
+             */
             Optional<SQLStatement> cachedSQLStatement = cache.getSQLStatement(sql);
             if (cachedSQLStatement.isPresent()) {
                 return cachedSQLStatement.get();
             }
         }
+
+        /**
+         *  委托 SQLParseKernel 创建 SQLStatement {@link SQLParseKernel
+         */
         SQLStatement result = new SQLParseKernel(ParseRuleRegistry.getInstance(), databaseTypeName, sql).parse();
         if (useCache) {
             cache.put(sql, result);

@@ -44,8 +44,12 @@ public final class SQLParserFactory {
      * @param databaseTypeName name of database type
      * @param sql SQL
      * @return SQL parser
+     *
+     *  负责具体的 SQL 到 AST（抽象语法树）的解析过程。
      */
     public static SQLParser newInstance(final String databaseTypeName, final String sql) {
+
+        // 通过 SPI 机制加载所有扩展
         for (SQLParserEntry each : NewInstanceServiceLoader.newServiceInstances(SQLParserEntry.class)) {
             if (each.getDatabaseTypeName().equals(databaseTypeName)) {
                 return createSQLParser(sql, each);

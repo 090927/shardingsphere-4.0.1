@@ -24,10 +24,12 @@ import org.apache.shardingsphere.core.database.DatabaseTypes;
 import org.apache.shardingsphere.core.execute.engine.ShardingExecuteEngine;
 import org.apache.shardingsphere.core.rule.BaseRule;
 import org.apache.shardingsphere.core.config.log.ConfigurationLogger;
+import org.apache.shardingsphere.core.rule.ShardingRule;
 import org.apache.shardingsphere.spi.database.DatabaseType;
 import org.apache.shardingsphere.sql.parser.SQLParseEngine;
 import org.apache.shardingsphere.sql.parser.SQLParseEngineFactory;
 
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -49,12 +51,19 @@ public abstract class AbstractRuntimeContext<T extends BaseRule> implements Runt
     private final ShardingExecuteEngine executeEngine;
     
     private final SQLParseEngine parseEngine;
-    
+
+    /**
+     * 构造函数，{@link ShardingRuntimeContext#ShardingRuntimeContext(Map, ShardingRule, Properties, DatabaseType)}
+     */
     protected AbstractRuntimeContext(final T rule, final Properties props, final DatabaseType databaseType) {
         this.rule = rule;
         this.props = new ShardingProperties(null == props ? new Properties() : props);
         this.databaseType = databaseType;
         executeEngine = new ShardingExecuteEngine(this.props.<Integer>getValue(ShardingPropertiesConstant.EXECUTOR_SIZE));
+
+        /**
+         *  SQLParseEngine SQL 解析工厂方法 {@link SQLParseEngineFactory#getSQLParseEngine(String)}
+         */
         parseEngine = SQLParseEngineFactory.getSQLParseEngine(DatabaseTypes.getTrunkDatabaseTypeName(databaseType));
         ConfigurationLogger.log(rule.getRuleConfiguration());
         ConfigurationLogger.log(props);

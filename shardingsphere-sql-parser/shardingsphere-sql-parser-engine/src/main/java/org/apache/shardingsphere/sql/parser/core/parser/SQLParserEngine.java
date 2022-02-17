@@ -55,9 +55,17 @@ public final class SQLParserEngine {
      * Parse SQL to abstract syntax tree.
      *
      * @return abstract syntax tree of SQL
+     *
+     *  生成 SQL 抽象语法树
      */
     public SQLAST parse() {
+
+        /**
+         *  ‘抽象语法树‘ 扩展 {@link SQLParserFactory#newInstance(String, String)}
+         */
         SQLParser sqlParser = SQLParserFactory.newInstance(databaseTypeName, sql);
+
+        // 利用 ANTLR4 获取解析树
         ParseTree parseTree;
         try {
             ((Parser) sqlParser).setErrorHandler(new BailErrorStrategy());
@@ -72,10 +80,18 @@ public final class SQLParserEngine {
         if (parseTree instanceof ErrorNode) {
             throw new SQLParsingException(String.format("Unsupported SQL of `%s`", sql));
         }
+
+        /**
+         * 获取配置文件的 SQLStatementRule {@link ParseRuleRegistry#getSQLStatementRule(String, String)}
+         *
+         *  1、使用 `SQLStatementRule` 提取 SQL 片段
+         */
         SQLStatementRule rule = parseRuleRegistry.getSQLStatementRule(databaseTypeName, parseTree.getClass().getSimpleName());
         if (null == rule) {
             throw new SQLParsingException(String.format("Unsupported SQL of `%s`", sql));
         }
+
+        // 封装抽象语法树 AST
         return new SQLAST((ParserRuleContext) parseTree, getParameterMarkerIndexes((ParserRuleContext) parseTree), rule);
     }
     

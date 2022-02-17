@@ -37,18 +37,32 @@ public final class TableExtractor implements OptionalSQLSegmentExtractor {
     
     @Override
     public Optional<TableSegment> extract(final ParserRuleContext ancestorNode, final Map<ParserRuleContext, Integer> parameterMarkerIndexes) {
+
+        // 从 Context 中获取 TableName 节
         Optional<ParserRuleContext> tableNameNode = ExtractorUtils.findFirstChildNode(ancestorNode, RuleName.TABLE_NAME);
         if (!tableNameNode.isPresent()) {
             return Optional.absent();
         }
+
+        /**
+         * 根据 tableName 节点构建 TableSegment {@link  #getTableSegment(ParserRuleContext)}
+         */
         TableSegment result = getTableSegment(tableNameNode.get());
+
+        //设置表的别名
         setAlias(tableNameNode.get(), result);
         return Optional.of(result);
     }
     
     private TableSegment getTableSegment(final ParserRuleContext tableNode) {
+
+        // 从Context中获取Name节点
         ParserRuleContext nameNode = ExtractorUtils.getFirstChildNode(tableNode, RuleName.NAME);
+
+        // 根据Name节点获取节点的起止位置以及节点内容
         TableSegment result = new TableSegment(nameNode.getStart().getStartIndex(), nameNode.getStop().getStopIndex(), nameNode.getText());
+
+        // 从Context中获取表的Owner节点，如果有的话就设置Owner
         Optional<ParserRuleContext> ownerNode = ExtractorUtils.findFirstChildNodeNoneRecursive(tableNode, RuleName.OWNER);
         if (ownerNode.isPresent()) {
             result.setOwner(new SchemaSegment(ownerNode.get().getStart().getStartIndex(), ownerNode.get().getStop().getStopIndex(), ownerNode.get().getText()));
@@ -57,6 +71,8 @@ public final class TableExtractor implements OptionalSQLSegmentExtractor {
     }
     
     private void setAlias(final ParserRuleContext tableNameNode, final TableSegment tableSegment) {
+
+        // 从 Context 中获取 Alias 节点，如果有的话就设置别名
         Optional<ParserRuleContext> aliasNode = ExtractorUtils.findFirstChildNode(tableNameNode.getParent(), RuleName.ALIAS);
         if (aliasNode.isPresent()) {
             tableSegment.setAlias(aliasNode.get().getText());
