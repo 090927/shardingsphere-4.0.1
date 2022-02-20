@@ -116,11 +116,30 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
     public ResultSet executeQuery() throws SQLException {
         ResultSet result;
         try {
+            /**
+             * 清除 StatementExecutor 中的相关变量 {@link #clearPrevious()}
+             */
             clearPrevious();
+
+            /**
+             * 执行路由引擎,获取路由结果 {@link #shard()}
+             */
             shard();
+
+            /**
+             * 初始化，StatementExecutor {@link #initPreparedStatementExecutor()}
+             */
             initPreparedStatementExecutor();
+
+            /**
+             * 调用归并引擎 {@link PreparedStatementExecutor#executeQuery()}
+             */
             MergeEngine mergeEngine = MergeEngineFactory.newInstance(connection.getRuntimeContext().getDatabaseType(), 
                     connection.getRuntimeContext().getRule(), sqlRouteResult, connection.getRuntimeContext().getMetaData().getRelationMetas(), preparedStatementExecutor.executeQuery());
+
+            /**
+             * 获取结果 {@link #getResultSet(MergeEngine)}
+             */
             result = getResultSet(mergeEngine);
         } finally {
             clearBatch();
@@ -215,6 +234,8 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
     private void initPreparedStatementExecutor() throws SQLException {
         preparedStatementExecutor.init(sqlRouteResult);
         setParametersForStatements();
+
+        //
         replayMethodForStatements();
     }
     
@@ -226,6 +247,10 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
     
     private void replayMethodForStatements() {
         for (Statement each : preparedStatementExecutor.getStatements()) {
+
+            /**
+             * 基于反射，针对 statementExecutor 中所有 Statement的 SQL 操作执行目标方法。
+             */
             replayMethodsInvocation(each);
         }
     }

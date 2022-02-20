@@ -36,6 +36,8 @@ import java.util.concurrent.ExecutionException;
  * Sharding execute engine.
  *
  * @author zhangliang
+ *
+ *  分片执行引擎入口类
  */
 public final class ShardingExecuteEngine implements AutoCloseable {
     
@@ -80,25 +82,57 @@ public final class ShardingExecuteEngine implements AutoCloseable {
         if (inputGroups.isEmpty()) {
             return Collections.emptyList();
         }
+
+        // 串行执行
         return serial ? serialExecute(inputGroups, firstCallback, callback) : parallelExecute(inputGroups, firstCallback, callback);
     }
-    
+
+    // 串行执行
     private <I, O> List<O> serialExecute(final Collection<ShardingExecuteGroup<I>> inputGroups, final ShardingGroupExecuteCallback<I, O> firstCallback,
                                          final ShardingGroupExecuteCallback<I, O> callback) throws SQLException {
         Iterator<ShardingExecuteGroup<I>> inputGroupsIterator = inputGroups.iterator();
+
+        //获取第一个输入的 ShardingExecuteGroup
         ShardingExecuteGroup<I> firstInputs = inputGroupsIterator.next();
+
+        /**
+         * 通过第一个回调 firstCallback 完成同步执行的 {@link #syncGroupExecute(ShardingExecuteGroup, ShardingGroupExecuteCallback)}  
+         */
         List<O> result = new LinkedList<>(syncGroupExecute(firstInputs, null == firstCallback ? callback : firstCallback));
+
+        //对剩下的 ShardingExecuteGroup，通过回调 callback 逐个同步执行 syncGroupExecute
         for (ShardingExecuteGroup<I> each : Lists.newArrayList(inputGroupsIterator)) {
             result.addAll(syncGroupExecute(each, callback));
         }
         return result;
     }
-    
+
+    /*
+     * 无论是  serialExecute、还是 parallelExecute
+     *  1、都会从 ShardingExecuteGroup 中获取第一个 firstInputs 元素并进行执行。
+     *     然后剩下的再进行同步、或异步执行。
+     *  2、ShardingSphere 这样使用线程，考虑到当前线程同样也是一个可用资源。
+     *     2.1、让第一个任务由当前线程进行执行，可用充分利用当前线程。从而最大化线程利用率。
+     */
+
+    /**
+     * 并行执行
+     */
     private <I, O> List<O> parallelExecute(final Collection<ShardingExecuteGroup<I>> inputGroups, final ShardingGroupExecuteCallback<I, O> firstCallback,
                                            final ShardingGroupExecuteCallback<I, O> callback) throws SQLException {
         Iterator<ShardingExecuteGroup<I>> inputGroupsIterator = inputGroups.iterator();
+
+        // 获取第一个输入的 ShardingExecuteGroup
         ShardingExecuteGroup<I> firstInputs = inputGroupsIterator.next();
+
+        /**
+         * 通过 {@link #asyncGroupExecute(ShardingExecuteGroup, ShardingGroupExecuteCallback)}  执行异步回调
+         */
         Collection<ListenableFuture<Collection<O>>> restResultFutures = asyncGroupExecute(Lists.newArrayList(inputGroupsIterator), callback);
+
+        /**
+         * 获取执行结果并组装返回
+         */
         return getGroupResults(syncGroupExecute(firstInputs, null == firstCallback ? callback : firstCallback), restResultFutures);
     }
     
@@ -112,16 +146,24 @@ public final class ShardingExecuteEngine implements AutoCloseable {
     
     private <I, O> ListenableFuture<Collection<O>> asyncGroupExecute(final ShardingExecuteGroup<I> inputGroup, final ShardingGroupExecuteCallback<I, O> callback) {
         final Map<String, Object> dataMap = ShardingExecuteDataMap.getDataMap();
+
+        // 使用 Guava 的 ListeningExecutorService， 提交一个异步执行的任务，并返回一个 ListenableFuture
         return executorService.submit(new Callable<Collection<O>>() {
             
             @Override
             public Collection<O> call() throws SQLException {
+                /**
+                 * [execute] {@link org.apache.shardingsphere.core.execute.sql.execute.SQLExecuteCallback#execute(Collection, boolean, Map)}
+                 */
                 return callback.execute(inputGroup.getInputs(), false, dataMap);
             }
         });
     }
     
     private <I, O> Collection<O> syncGroupExecute(final ShardingExecuteGroup<I> executeGroup, final ShardingGroupExecuteCallback<I, O> callback) throws SQLException {
+        /**
+         *  [execute] {@link org.apache.shardingsphere.core.execute.sql.execute.SQLExecuteCallback#execute(Collection, boolean, Map)}
+         */
         return callback.execute(executeGroup.getInputs(), true, ShardingExecuteDataMap.getDataMap());
     }
     

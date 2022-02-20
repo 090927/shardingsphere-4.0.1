@@ -31,14 +31,18 @@ import java.util.concurrent.TimeUnit;
  *
  * @author wuxu
  * @author zhaojun
+ *
+ *  执行器服务。与 JDK ExecutorService 类似
  */
 @Getter
 public final class ShardingExecutorService {
     
     private static final String DEFAULT_NAME_FORMAT = "%d";
-    
+
+    // JDK - Executor
     private static final ExecutorService SHUTDOWN_EXECUTOR = Executors.newSingleThreadExecutor(ShardingThreadFactoryBuilder.build("Executor-Engine-Closer"));
-    
+
+    // Guava
     private ListeningExecutorService executorService;
     
     public ShardingExecutorService(final int executorSize) {
@@ -47,9 +51,12 @@ public final class ShardingExecutorService {
     
     public ShardingExecutorService(final int executorSize, final String nameFormat) {
         executorService = MoreExecutors.listeningDecorator(getExecutorService(executorSize, nameFormat));
+
+        // 用于,JVM 会在用户线程结束后等待一段时间，再关闭（这段之间守护线程可以工作）
         MoreExecutors.addDelayedShutdownHook(executorService, 60, TimeUnit.SECONDS);
     }
-    
+
+    //
     private ExecutorService getExecutorService(final int executorSize, final String nameFormat) {
         ThreadFactory shardingThreadFactory = ShardingThreadFactoryBuilder.build(nameFormat);
         return 0 == executorSize ? Executors.newCachedThreadPool(shardingThreadFactory) : Executors.newFixedThreadPool(executorSize, shardingThreadFactory);

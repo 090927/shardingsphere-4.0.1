@@ -33,6 +33,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -70,17 +71,36 @@ public abstract class SQLExecuteCallback<T> implements ShardingGroupExecuteCallb
      * @see <a href="https://github.com/apache/skywalking/blob/master/docs/en/guides/Java-Plugin-Development-Guide.md#user-content-plugin-development-guide">Plugin Development Guide</a>
      */
     private T execute0(final StatementExecuteUnit statementExecuteUnit, final boolean isTrunkThread, final Map<String, Object> shardingExecuteDataMap) throws SQLException {
+
+        // 设置 ExecutorExceptionHandler
         ExecutorExceptionHandler.setExceptionThrown(isExceptionThrown);
+
+        // 获取 DataSourceMetaData，这里用到了缓存机制
         DataSourceMetaData dataSourceMetaData = getDataSourceMetaData(statementExecuteUnit.getStatement().getConnection().getMetaData());
+
+        // 初始化 SQLExecutionHook
         SQLExecutionHook sqlExecutionHook = new SPISQLExecutionHook();
         try {
             RouteUnit routeUnit = statementExecuteUnit.getRouteUnit();
+
+            /**
+             * 启用 hook {@link SPISQLExecutionHook#start(String, String, List, DataSourceMetaData, boolean, Map)}
+             */
             sqlExecutionHook.start(routeUnit.getDataSourceName(), routeUnit.getSqlUnit().getSql(), routeUnit.getSqlUnit().getParameters(), dataSourceMetaData, isTrunkThread, shardingExecuteDataMap);
+
+            /**
+             *  执行 SQL {@link #executeSQL(String, Statement, ConnectionMode)}
+             */
             T result = executeSQL(routeUnit.getSqlUnit().getSql(), statementExecuteUnit.getStatement(), statementExecuteUnit.getConnectionMode());
+
+            // 成功- hook
             sqlExecutionHook.finishSuccess();
             return result;
         } catch (final SQLException ex) {
+
+            // 执行失败- hook
             sqlExecutionHook.finishFailure(ex);
+            // 异常处理
             ExecutorExceptionHandler.handleException(ex);
             return null;
         }

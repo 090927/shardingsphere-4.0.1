@@ -38,20 +38,28 @@ import java.util.List;
  * SQL rewrite context.
  * 
  * @author zhangliang
+ *
+ *  SQL 重写上下文
  */
 @Getter
 public final class SQLRewriteContext {
-    
+
+    // 数据表和列的关系元数据
     private final RelationMetas relationMetas;
-    
+
+    // SQLStatement 上下文
     private final SQLStatementContext sqlStatementContext;
-    
+
+    // 原始SQL
     private final String sql;
-    
+
+    // 参数列表
     private final List<Object> parameters;
-    
+
+    // SQLToken 列表
     private final List<SQLToken> sqlTokens = new LinkedList<>();
-    
+
+    // SQLToken 生成器
     private final ParameterBuilder parameterBuilder;
     
     @Getter(AccessLevel.NONE)

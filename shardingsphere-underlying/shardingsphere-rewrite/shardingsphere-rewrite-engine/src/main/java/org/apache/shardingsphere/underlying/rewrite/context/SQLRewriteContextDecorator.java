@@ -21,6 +21,11 @@ package org.apache.shardingsphere.underlying.rewrite.context;
  * SQL rewrite context decorator.
  *
  * @author zhangliang
+ *
+ *  SQLRewriteContext 装饰器
+ *
+ *   用于分片处理 {@link org.apache.shardingsphere.sharding.rewrite.context.ShardingSQLRewriteContextDecorator}
+ *   数据脱敏 {@link  org.apache.shardingsphere.encrypt.rewrite.context.EncryptSQLRewriteContextDecorator}
  */
 public interface SQLRewriteContextDecorator {
     

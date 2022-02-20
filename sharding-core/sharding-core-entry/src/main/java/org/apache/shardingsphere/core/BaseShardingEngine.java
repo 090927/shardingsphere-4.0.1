@@ -70,11 +70,15 @@ public abstract class BaseShardingEngine {
         List<Object> clonedParameters = cloneParameters(parameters);
 
         /**
-         * 执行路由 {@link #executeRoute(String, List)}
+         *  执行路由 {@link #executeRoute(String, List)}
          */
         SQLRouteResult result = executeRoute(sql, clonedParameters);
 
-        //执行 SQL 转换（Convert）和改写（Rewrite）
+        /**
+         * 执行 SQL 转换（Convert）和改写（Rewrite）
+         *
+         *  1、改写逻辑 {@link #rewriteAndConvert(String, List, SQLRouteResult)}
+         */
         result.getRouteUnits().addAll(HintManager.isDatabaseShardingOnly() ? convert(sql, clonedParameters, result) : rewriteAndConvert(sql, clonedParameters, result));
         boolean showSQL = shardingProperties.getValue(ShardingPropertiesConstant.SQL_SHOW);
         if (showSQL) {
@@ -115,17 +119,44 @@ public abstract class BaseShardingEngine {
         }
         return result;
     }
-    
+
+    /**
+     * 改写 SQL 语句
+     */
     private Collection<RouteUnit> rewriteAndConvert(final String sql, final List<Object> parameters, final SQLRouteResult sqlRouteResult) {
+        /**
+         * 构建 SQLRewriteContext {@link SQLRewriteContext
+         */
         SQLRewriteContext sqlRewriteContext = new SQLRewriteContext(metaData.getRelationMetas(), sqlRouteResult.getSqlStatementContext(), sql, parameters);
+
+        /**
+         * 对 SQLRewriteContext 进行装饰 {@link ShardingSQLRewriteContextDecorator#decorate(SQLRewriteContext)}
+         */
         new ShardingSQLRewriteContextDecorator(shardingRule, sqlRouteResult).decorate(sqlRewriteContext);
+
+        // 判断是否根据数据脱敏列进行查询
         boolean isQueryWithCipherColumn = shardingProperties.<Boolean>getValue(ShardingPropertiesConstant.QUERY_WITH_CIPHER_COLUMN);
+
+        //构建 EncryptSQLRewriteContextDecorator 对 SQLRewriteContext 进行装饰
         new EncryptSQLRewriteContextDecorator(shardingRule.getEncryptRule(), isQueryWithCipherColumn).decorate(sqlRewriteContext);
+
+        /**
+         * 生成 SQLTokens {@link SQLRewriteContext#generateSQLTokens()}
+         */
         sqlRewriteContext.generateSQLTokens();
         Collection<RouteUnit> result = new LinkedHashSet<>();
         for (RoutingUnit each : sqlRouteResult.getRoutingResult().getRoutingUnits()) {
+
+            //构建 ShardingSQLRewriteEngine
             ShardingSQLRewriteEngine sqlRewriteEngine = new ShardingSQLRewriteEngine(shardingRule, sqlRouteResult.getShardingConditions(), each);
+
+            /**
+             *  SQL 改写 {@link ShardingSQLRewriteEngine#rewrite(SQLRewriteContext)}
+             *   例如: 表名改写，逻辑表名 -> 真实表名
+             */
             SQLRewriteResult sqlRewriteResult = sqlRewriteEngine.rewrite(sqlRewriteContext);
+
+            //保存改写结果
             result.add(new RouteUnit(each.getDataSourceName(), new SQLUnit(sqlRewriteResult.getSql(), sqlRewriteResult.getParameters())));
         }
         return result;

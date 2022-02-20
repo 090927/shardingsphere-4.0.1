@@ -41,6 +41,8 @@ public interface SQLExecutePrepareCallback {
      * @param connectionSize connection size
      * @return connection
      * @throws SQLException SQL exception
+     *
+     * 获取 Connection 列表
      */
     List<Connection> getConnections(ConnectionMode connectionMode, String dataSourceName, int connectionSize) throws SQLException;
     
@@ -52,6 +54,8 @@ public interface SQLExecutePrepareCallback {
      * @param connectionMode connection mode
      * @return SQL execute unit
      * @throws SQLException SQL exception
+     *
+     * 获取 Statement 执行单元
      */
     StatementExecuteUnit createStatementExecuteUnit(Connection connection, RouteUnit routeUnit, ConnectionMode connectionMode) throws SQLException;
 }

@@ -23,6 +23,9 @@ package org.apache.shardingsphere.core.constant;
  * @author zhangyonglun
  */
 public enum ConnectionMode {
-    
-    MEMORY_STRICTLY, CONNECTION_STRICTLY
+
+    // 内存限制模式
+    MEMORY_STRICTLY,
+    // 连接限制模式
+    CONNECTION_STRICTLY
 }

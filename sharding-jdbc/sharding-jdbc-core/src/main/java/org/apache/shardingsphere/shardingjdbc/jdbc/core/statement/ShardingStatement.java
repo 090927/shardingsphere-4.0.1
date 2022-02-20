@@ -153,8 +153,18 @@ public final class ShardingStatement extends AbstractStatementAdapter {
     @Override
     public int executeUpdate(final String sql) throws SQLException {
         try {
+
+            //清除 StatementExecutor 中的相关变量
             clearPrevious();
+
+            /**
+             * 执行路由引擎，获取路由结果 {@link #shard(String)}
+             */
             shard(sql);
+
+            /**
+             * 初始化，StatementExecutor {@link #initStatementExecutor()}
+             */
             initStatementExecutor();
             return statementExecutor.executeUpdate();
         } finally {
@@ -268,11 +278,15 @@ public final class ShardingStatement extends AbstractStatementAdapter {
     }
     
     private void shard(final String sql) {
+
+        //从 Connection 中获取 ShardingRuntimeContext 上下文
         ShardingRuntimeContext runtimeContext = connection.getRuntimeContext();
+
+        //创建 SimpleQueryShardingEngine
         SimpleQueryShardingEngine shardingEngine = new SimpleQueryShardingEngine(runtimeContext.getRule(), runtimeContext.getProps(), runtimeContext.getMetaData(), runtimeContext.getParseEngine());
 
         /**
-         * 获取 分片路由 {@link org.apache.shardingsphere.core.BaseShardingEngine#shard(String, List)}
+         * 执行分片路由并获取路由结果 {@link org.apache.shardingsphere.core.BaseShardingEngine#shard(String, List)}
          */
         sqlRouteResult = shardingEngine.shard(sql, Collections.emptyList());
     }

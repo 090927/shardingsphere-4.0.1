@@ -30,6 +30,7 @@ import org.apache.shardingsphere.sharding.rewrite.sql.ShardingSQLBuilder;
 import org.apache.shardingsphere.underlying.rewrite.parameter.builder.ParameterBuilder;
 import org.apache.shardingsphere.underlying.rewrite.parameter.builder.impl.GroupedParameterBuilder;
 import org.apache.shardingsphere.underlying.rewrite.parameter.builder.impl.StandardParameterBuilder;
+import org.apache.shardingsphere.underlying.rewrite.sql.impl.AbstractSQLBuilder;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -47,9 +48,16 @@ public final class ShardingSQLRewriteEngine implements SQLRewriteEngine {
     private final ShardingConditions shardingConditions;
     
     private final RoutingUnit routingUnit;
-    
+
+    /**
+     * 基于 SQLRewriteContext 执行 SQL 改写。
+     */
     @Override
     public SQLRewriteResult rewrite(final SQLRewriteContext sqlRewriteContext) {
+
+        /**
+         *  生成 SQL 语句 [核心] {@link AbstractSQLBuilder#toSQL()}
+         */
         return new SQLRewriteResult(new ShardingSQLBuilder(sqlRewriteContext, shardingRule, routingUnit).toSQL(), getParameters(sqlRewriteContext.getParameterBuilder()));
     }
     

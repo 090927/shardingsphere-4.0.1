@@ -23,6 +23,12 @@ import org.apache.shardingsphere.sql.parser.relation.statement.SQLStatementConte
  * SQL token generator.
  *
  * @author zhangliang
+ *
+ *  作用: 专门负责生产具体的 Token
+ *
+ *   子类：
+ *     生成单个 SQLToken {@link OptionalSQLTokenGenerator}
+ *     批量生成 SQLToken {@link CollectionSQLTokenGenerator}
  */
 public interface SQLTokenGenerator {
     
@@ -31,6 +37,8 @@ public interface SQLTokenGenerator {
      *
      * @param sqlStatementContext SQL statement context
      * @return is generate SQL token or not
+     *
+     *  判断是否要生成 SQLToken
      */
     boolean isGenerateSQLToken(SQLStatementContext sqlStatementContext);
 }

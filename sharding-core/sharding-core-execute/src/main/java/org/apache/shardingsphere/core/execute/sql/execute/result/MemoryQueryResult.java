@@ -41,6 +41,8 @@ import java.util.List;
  * @author zhangliang
  * @author panjuan
  * @author yangyi
+ *
+ *  内存归并结果
  */
 public final class MemoryQueryResult implements QueryResult {
     
@@ -60,7 +62,11 @@ public final class MemoryQueryResult implements QueryResult {
         while (resultSet.next()) {
             List<Object> rowData = new ArrayList<>(resultSet.getMetaData().getColumnCount());
             for (int columnIndex = 1; columnIndex <= resultSet.getMetaData().getColumnCount(); columnIndex++) {
+
+                // 获取每一个 Row 的数据
                 Object rowValue = getRowValue(resultSet, columnIndex);
+
+                // 存放在内存中
                 rowData.add(resultSet.wasNull() ? null : rowValue);
             }
             result.add(rowData);

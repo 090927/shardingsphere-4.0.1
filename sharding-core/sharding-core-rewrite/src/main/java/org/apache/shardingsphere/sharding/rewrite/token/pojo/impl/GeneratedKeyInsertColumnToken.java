@@ -24,6 +24,8 @@ import org.apache.shardingsphere.underlying.rewrite.sql.token.pojo.SQLToken;
  * Generated key insert column token.
  *
  * @author zhangliang
+ *
+ *  自动主键填充，也属于常见的一种 SQL 改写策略
  */
 public final class GeneratedKeyInsertColumnToken extends SQLToken implements Attachable {
     

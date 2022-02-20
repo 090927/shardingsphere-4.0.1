@@ -32,6 +32,8 @@ public interface SQLTokenGeneratorBuilder {
      * Get SQL token generators.
      * 
      * @return SQL token generators
+     *
+     * 获取 SQLTokenGenerator 列表
      */
     Collection<SQLTokenGenerator> getSQLTokenGenerators();
 }

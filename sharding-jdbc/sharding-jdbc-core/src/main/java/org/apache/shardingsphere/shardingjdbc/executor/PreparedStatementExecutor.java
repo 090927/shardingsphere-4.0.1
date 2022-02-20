@@ -23,6 +23,8 @@ import org.apache.shardingsphere.core.execute.engine.ShardingExecuteGroup;
 import org.apache.shardingsphere.core.execute.sql.StatementExecuteUnit;
 import org.apache.shardingsphere.core.execute.sql.execute.SQLExecuteCallback;
 import org.apache.shardingsphere.core.execute.sql.execute.result.MemoryQueryResult;
+import org.apache.shardingsphere.shardingjdbc.jdbc.core.statement.MasterSlavePreparedStatement;
+import org.apache.shardingsphere.shardingjdbc.jdbc.core.statement.ShardingPreparedStatement;
 import org.apache.shardingsphere.underlying.execute.QueryResult;
 import org.apache.shardingsphere.core.execute.sql.execute.result.StreamQueryResult;
 import org.apache.shardingsphere.core.execute.sql.execute.threadlocal.ExecutorExceptionHandler;
@@ -99,20 +101,37 @@ public final class PreparedStatementExecutor extends AbstractStatementExecutor {
      */
     public List<QueryResult> executeQuery() throws SQLException {
         final boolean isExceptionThrown = ExecutorExceptionHandler.isExceptionThrown();
+
+        // 创建 SQLExecuteCallback 并执行查询
         SQLExecuteCallback<QueryResult> executeCallback = new SQLExecuteCallback<QueryResult>(getDatabaseType(), isExceptionThrown) {
             
             @Override
             protected QueryResult executeSQL(final String sql, final Statement statement, final ConnectionMode connectionMode) throws SQLException {
+
+                /**
+                 *  [getQueryResult] {@link PreparedStatementExecutor#getQueryResult(Statement, ConnectionMode)}
+                 */
                 return getQueryResult(statement, connectionMode);
             }
         };
+
+        // 执行 SQLExecuteCallback 并返回结果
         return executeCallback(executeCallback);
     }
     
     private QueryResult getQueryResult(final Statement statement, final ConnectionMode connectionMode) throws SQLException {
         PreparedStatement preparedStatement = (PreparedStatement) statement;
+
+        /**
+         * 通过 Statement 执行 SQL 并获取结果
+         *
+         *   1、分片结构,执行查询 {@link ShardingPreparedStatement#executeQuery()}
+         *   2、主从结构,执行查询 {@link MasterSlavePreparedStatement#executeQuery()}
+         */
         ResultSet resultSet = preparedStatement.executeQuery();
         getResultSets().add(resultSet);
+
+        // 根据连接模式来确认构建结果
         return ConnectionMode.MEMORY_STRICTLY == connectionMode ? new StreamQueryResult(resultSet) : new MemoryQueryResult(resultSet);
     }
     

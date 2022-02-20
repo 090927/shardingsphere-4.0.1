@@ -25,6 +25,8 @@ import org.apache.shardingsphere.underlying.rewrite.sql.token.pojo.SQLToken;
  *
  * @author zhangliang
  * @author panjuan
+ *
+ *  生成单个 SQLToken
  */
 public interface OptionalSQLTokenGenerator extends SQLTokenGenerator {
     
@@ -33,6 +35,8 @@ public interface OptionalSQLTokenGenerator extends SQLTokenGenerator {
      * 
      * @param sqlStatementContext SQL statement context
      * @return SQL token
+     *
+     *  生成单个 SQLToken
      */
     SQLToken generateSQLToken(SQLStatementContext sqlStatementContext);
 }

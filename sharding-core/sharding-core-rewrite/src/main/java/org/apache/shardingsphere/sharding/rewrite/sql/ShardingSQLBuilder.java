@@ -49,12 +49,23 @@ public final class ShardingSQLBuilder extends AbstractSQLBuilder {
         this.shardingRule = shardingRule;
         this.routingUnit = routingUnit;
     }
-    
+
+
     @Override
     protected String getSQLTokenText(final SQLToken sqlToken) {
         if (sqlToken instanceof RoutingUnitAware) {
+            /**
+             *  insert 语句 {@link org.apache.shardingsphere.sharding.rewrite.token.pojo.impl.ShardingInsertValuesToken#toString(RoutingUnit)}
+             */
             return ((RoutingUnitAware) sqlToken).toString(routingUnit);
         }
+
+        /**
+         * LogicAndActualTablesAware 表名改写，就是将逻辑表名, 改写为真实表名的过程
+         *
+         *      1、获取真实表名 {@link #getLogicAndActualTables()}
+         *      2、拼接SQLToken {@link org.apache.shardingsphere.sharding.rewrite.token.pojo.impl.TableToken#toString(Map)}
+         */
         if (sqlToken instanceof LogicAndActualTablesAware) {
             return ((LogicAndActualTablesAware) sqlToken).toString(getLogicAndActualTables());
         }
@@ -65,6 +76,8 @@ public final class ShardingSQLBuilder extends AbstractSQLBuilder {
         Map<String, String> result = new HashMap<>();
         Collection<String> tableNames = getContext().getSqlStatementContext().getTablesContext().getTableNames();
         for (TableUnit each : routingUnit.getTableUnits()) {
+
+            // 真实表名
             String logicTableName = each.getLogicTableName().toLowerCase();
             result.put(logicTableName, each.getActualTableName());
             result.putAll(getLogicAndActualTablesFromBindingTable(routingUnit.getMasterSlaveLogicDataSourceName(), each, tableNames));

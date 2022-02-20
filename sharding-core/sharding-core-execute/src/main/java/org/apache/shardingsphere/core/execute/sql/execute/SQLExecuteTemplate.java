@@ -38,7 +38,8 @@ import java.util.List;
  */
 @RequiredArgsConstructor
 public final class SQLExecuteTemplate {
-    
+
+    // 分片执行引擎
     private final ShardingExecuteEngine executeEngine;
     
     private final boolean serial;

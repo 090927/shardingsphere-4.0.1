@@ -75,10 +75,14 @@ public final class SQLTokenGenerators {
                 continue;
             }
             if (each instanceof OptionalSQLTokenGenerator) {
+
+                // 生成单个 SQLToken
                 SQLToken sqlToken = ((OptionalSQLTokenGenerator) each).generateSQLToken(sqlStatementContext);
                 if (!result.contains(sqlToken)) {
                     result.add(sqlToken);
                 }
+
+                // 批量生成 SQLToken
             } else if (each instanceof CollectionSQLTokenGenerator) {
                 result.addAll(((CollectionSQLTokenGenerator) each).generateSQLTokens(sqlStatementContext));
             }

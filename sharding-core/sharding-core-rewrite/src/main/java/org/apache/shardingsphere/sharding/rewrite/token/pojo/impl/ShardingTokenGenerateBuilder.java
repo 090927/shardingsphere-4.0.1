@@ -53,7 +53,10 @@ public final class ShardingTokenGenerateBuilder implements SQLTokenGeneratorBuil
     private final ShardingRule shardingRule;
     
     private final SQLRouteResult sqlRouteResult;
-    
+
+    /**
+     * 获取 SQLTokenGenerator 列表
+     */
     @Override
     public Collection<SQLTokenGenerator> getSQLTokenGenerators() {
         Collection<SQLTokenGenerator> result = buildSQLTokenGenerators();

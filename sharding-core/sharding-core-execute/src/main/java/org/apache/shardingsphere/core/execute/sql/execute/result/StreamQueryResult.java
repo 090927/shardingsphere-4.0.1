@@ -37,6 +37,8 @@ import java.util.Calendar;
  * @author zhangliang
  * @author panjuan
  * @author yangyi
+ *
+ *  流式归并结果
  */
 public final class StreamQueryResult implements QueryResult {
     

@@ -63,39 +63,52 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @Getter(AccessLevel.PROTECTED)
 public abstract class AbstractStatementExecutor {
-    
+
+    //数据库类型
     private final DatabaseType databaseType;
-    
+
+    //JDBC中用于指定结果处理方式的 resultSetType
     @Getter
     private final int resultSetType;
-    
+
+    //JDBC中用于指定是否可对结果集进行修改的 resultSetConcurrency
     @Getter
     private final int resultSetConcurrency;
-    
+
+    //JDBC中用于指定事务提交或回滚后结果集是否仍然可用的 resultSetConcurrency
     @Getter
     private final int resultSetHoldability;
-    
+
+    //分片 Connection
     private final ShardingConnection connection;
-    
+
+    //用于数据准备的模板类
     private final SQLExecutePrepareTemplate sqlExecutePrepareTemplate;
-    
+
+    //SQL 执行模板类
     private final SQLExecuteTemplate sqlExecuteTemplate;
-    
+
+    //JDBC的Connection列表
     private final Collection<Connection> connections = new LinkedList<>();
-    
+
+    //SQLStatement 上下文
     @Getter
     @Setter
     private SQLStatementContext sqlStatementContext;
-    
+
+    //参数集
     @Getter
     private final List<List<Object>> parameterSets = new LinkedList<>();
-    
+
+    //JDBC的Statement 列表
     @Getter
     private final List<Statement> statements = new LinkedList<>();
-    
+
+    //JDBC的ResultSet 列表
     @Getter
     private final List<ResultSet> resultSets = new CopyOnWriteArrayList<>();
-    
+
+    //ShardingExecuteGroup 列表
     private final Collection<ShardingExecuteGroup<StatementExecuteUnit>> executeGroups = new LinkedList<>();
     
     public AbstractStatementExecutor(final int resultSetType, final int resultSetConcurrency, final int resultSetHoldability, final ShardingConnection shardingConnection) {

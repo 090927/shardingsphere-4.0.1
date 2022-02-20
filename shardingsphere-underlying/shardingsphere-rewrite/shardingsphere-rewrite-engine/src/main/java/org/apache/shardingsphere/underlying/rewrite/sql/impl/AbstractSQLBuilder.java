@@ -36,7 +36,10 @@ import java.util.Collections;
 public abstract class AbstractSQLBuilder implements SQLBuilder {
     
     private final SQLRewriteContext context;
-    
+
+    /**
+     * 生成 SQL 语句
+     */
     @Override
     public final String toSQL() {
         if (context.getSqlTokens().isEmpty()) {
@@ -45,13 +48,20 @@ public abstract class AbstractSQLBuilder implements SQLBuilder {
         Collections.sort(context.getSqlTokens());
         StringBuilder result = new StringBuilder();
         result.append(context.getSql().substring(0, context.getSqlTokens().get(0).getStartIndex()));
+
+        //根据 SQLToken 拼装目标 SQL
         for (SQLToken each : context.getSqlTokens()) {
+
+            /**
+             * 获取 SQLToken 文本 {@link org.apache.shardingsphere.sharding.rewrite.sql.ShardingSQLBuilder#getSQLTokenText(SQLToken)} 
+             */
             result.append(getSQLTokenText(each));
             result.append(getConjunctionText(each));
         }
         return result.toString();
     }
-    
+
+    // 模板方法，子类实现
     protected abstract String getSQLTokenText(SQLToken sqlToken);
     
     private String getConjunctionText(final SQLToken sqlToken) {

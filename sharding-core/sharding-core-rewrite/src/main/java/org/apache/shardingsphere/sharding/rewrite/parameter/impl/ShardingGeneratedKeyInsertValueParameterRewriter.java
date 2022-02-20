@@ -45,11 +45,16 @@ public final class ShardingGeneratedKeyInsertValueParameterRewriter implements P
     public boolean isNeedRewrite(final SQLStatementContext sqlStatementContext) {
         return sqlStatementContext instanceof InsertSQLStatementContext && sqlRouteResult.getGeneratedKey().isPresent() && sqlRouteResult.getGeneratedKey().get().isGenerated();
     }
-    
+
+    /**
+     *  因为 `ParameterRewriter` 面向 `InsertSQLStatement` 所以用到 GroupParameterBuilder.
+     */
     @Override
     public void rewrite(final ParameterBuilder parameterBuilder, final SQLStatementContext sqlStatementContext, final List<Object> parameters) {
         Preconditions.checkState(sqlRouteResult.getGeneratedKey().isPresent());
         ((GroupedParameterBuilder) parameterBuilder).setDerivedColumnName(sqlRouteResult.getGeneratedKey().get().getColumnName());
+
+        // 获取 GeneratedKey
         Iterator<Comparable<?>> generatedValues = sqlRouteResult.getGeneratedKey().get().getGeneratedValues().descendingIterator();
         int count = 0;
         int parametersCount = 0;
@@ -57,6 +62,8 @@ public final class ShardingGeneratedKeyInsertValueParameterRewriter implements P
             parametersCount += ((InsertSQLStatementContext) sqlStatementContext).getInsertValueContexts().get(count).getParametersCount();
             Comparable<?> generatedValue = generatedValues.next();
             if (!each.isEmpty()) {
+
+                //使用 GroupedParameterBuilder 进行补列和设置参数
                 ((GroupedParameterBuilder) parameterBuilder).getParameterBuilders().get(count).addAddedParameters(parametersCount, Lists.<Object>newArrayList(generatedValue));
             }
             count++;

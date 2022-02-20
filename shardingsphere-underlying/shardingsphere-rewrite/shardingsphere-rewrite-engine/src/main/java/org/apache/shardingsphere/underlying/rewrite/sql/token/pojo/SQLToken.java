@@ -25,6 +25,8 @@ import lombok.RequiredArgsConstructor;
  *
  * @author zhangliang
  * @author panjuan
+ *
+ *   SQLRewriteEngine 基于 [ SQLToken ] 实现 SQL 改写。
  */
 @RequiredArgsConstructor
 @Getter

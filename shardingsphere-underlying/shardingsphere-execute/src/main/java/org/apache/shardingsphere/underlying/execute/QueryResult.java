@@ -26,6 +26,8 @@ import java.util.Calendar;
  *
  * @author zhangliang
  * @author yangyi
+ *
+ *  代表查询结果的接口
  */
 public interface QueryResult {
     
