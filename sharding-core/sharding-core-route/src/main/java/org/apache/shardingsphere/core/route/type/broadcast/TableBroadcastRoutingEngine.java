@@ -55,6 +55,11 @@ public final class TableBroadcastRoutingEngine implements RoutingEngine {
     public RoutingResult route() {
         RoutingResult result = new RoutingResult();
         for (String each : getLogicTableNames()) {
+
+            /**
+             * 根据 logicTableName 获取对应 TableRule,
+             *  然后根据 TableRule 中的真实 DataNode 构建 RoutingUnit {@link #getAllRoutingUnits(String)}
+             */
             result.getRoutingUnits().addAll(getAllRoutingUnits(each));
         }
         return result;
@@ -86,9 +91,15 @@ public final class TableBroadcastRoutingEngine implements RoutingEngine {
     
     private Collection<RoutingUnit> getAllRoutingUnits(final String logicTableName) {
         Collection<RoutingUnit> result = new LinkedList<>();
+
+        //根据 logicTableName 获取对应的 TableRule
         TableRule tableRule = shardingRule.getTableRule(logicTableName);
         for (DataNode each : tableRule.getActualDataNodes()) {
+
+            //根据 TableRule 中的真实 DataNode 构建 RoutingUnit 对象
             RoutingUnit routingUnit = new RoutingUnit(each.getDataSourceName());
+
+            //根据 DataNode 的 TableName 构建 TableUnit
             routingUnit.getTableUnits().add(new TableUnit(logicTableName, each.getTableName()));
             result.add(routingUnit);
         }

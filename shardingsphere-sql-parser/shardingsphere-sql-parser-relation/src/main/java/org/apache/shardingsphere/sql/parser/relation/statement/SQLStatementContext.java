@@ -24,6 +24,8 @@ import org.apache.shardingsphere.sql.parser.sql.statement.SQLStatement;
  * SQL statement context.
  *
  * @author zhangliang
+ *
+ *  上下文对象，保存着与特定 SQLStatement 相关信息，用于为后续处理提供数据存储、传递
  */
 public interface SQLStatementContext {
     

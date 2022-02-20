@@ -28,6 +28,8 @@ public interface RoutingEngine {
      * Route.
      *
      * @return routing result
+     *
+     *  执行路由
      */
     RoutingResult route();
 }

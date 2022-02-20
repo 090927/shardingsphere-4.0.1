@@ -28,8 +28,12 @@ public final class RangeModuloDatabaseShardingAlgorithm implements RangeSharding
     @Override
     public Collection<String> doSharding(final Collection<String> availableTargetNames, final RangeShardingValue<Integer> shardingValue) {
         Collection<String> result = new LinkedHashSet<>(availableTargetNames.size());
+
+        //根据分片值，决定分片的范围
         for (Integer i = shardingValue.getValueRange().lowerEndpoint(); i <= shardingValue.getValueRange().upperEndpoint(); i++) {
             for (String each : availableTargetNames) {
+
+                //分片值执行对 2 的取模操作，并与目标数据库进行比对
                 if (each.endsWith(i % 2 + "")) {
                     result.add(each);
                 }

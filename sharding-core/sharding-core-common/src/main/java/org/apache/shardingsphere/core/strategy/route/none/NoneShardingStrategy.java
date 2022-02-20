@@ -28,6 +28,8 @@ import java.util.Collections;
  * None sharding strategy.
  * 
  * @author zhangliang
+ *
+ *  不分片策略
  */
 @Getter
 public final class NoneShardingStrategy implements ShardingStrategy {

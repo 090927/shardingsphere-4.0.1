@@ -39,12 +39,22 @@ public final class ShardingStatementValidatorFactory {
      * 
      * @param sqlStatement SQL statement
      * @return instance of sharding statement validator
+     *
+     *  典型的工厂模型
+     *
+     *   针对，Insert、Update 进行语法验证
      */
     public static Optional<ShardingStatementValidator> newInstance(final SQLStatement sqlStatement) {
+
+        // 根据不同的类，提供不同的验证方式
         if (sqlStatement instanceof InsertStatement) {
+
+            // InsertStatement 类型
             return Optional.<ShardingStatementValidator>of(new ShardingInsertStatementValidator());
         }
         if (sqlStatement instanceof UpdateStatement) {
+
+            // UpdateStatement 类型
             return Optional.<ShardingStatementValidator>of(new ShardingUpdateStatementValidator());
         }
         return Optional.absent();

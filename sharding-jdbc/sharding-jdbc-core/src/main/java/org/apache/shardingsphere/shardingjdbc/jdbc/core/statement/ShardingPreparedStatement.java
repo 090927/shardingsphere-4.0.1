@@ -246,6 +246,10 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
     }
     
     private void shard() {
+
+        /**
+         * 获取 分片路由 {@link org.apache.shardingsphere.core.BaseShardingEngine#shard(String, List)}
+         */
         sqlRouteResult = shardingEngine.shard(sql, getParameters());
     }
     

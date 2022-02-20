@@ -36,7 +36,10 @@ import java.util.Set;
  */
 @Getter
 public final class RoutingResult {
-    
+
+    /**
+     * 包含一个 RoutingUnit 集合
+     */
     private final Collection<RoutingUnit> routingUnits = new LinkedHashSet<>();
     
     /**

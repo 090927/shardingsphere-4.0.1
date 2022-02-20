@@ -39,6 +39,8 @@ import java.util.TreeSet;
  * Complex sharding strategy.
  * 
  * @author zhangliang
+ *
+ *  复合分片策略， 支持多个分片键
  */
 public final class ComplexShardingStrategy implements ShardingStrategy {
     
@@ -63,8 +65,12 @@ public final class ComplexShardingStrategy implements ShardingStrategy {
         String logicTableName = "";
         for (RouteValue each : shardingValues) {
             if (each instanceof ListRouteValue) {
+
+                //构建 ListRouteValue
                 columnShardingValues.put(each.getColumnName(), ((ListRouteValue) each).getValues());
             } else if (each instanceof RangeRouteValue) {
+
+                //构建 RangeRouteValue
                 columnRangeValues.put(each.getColumnName(), ((RangeRouteValue) each).getValueRange());
             }
             logicTableName = each.getTableName();

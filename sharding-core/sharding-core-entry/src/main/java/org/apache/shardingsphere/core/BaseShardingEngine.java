@@ -32,6 +32,7 @@ import org.apache.shardingsphere.core.rule.ShardingRule;
 import org.apache.shardingsphere.encrypt.rewrite.context.EncryptSQLRewriteContextDecorator;
 import org.apache.shardingsphere.sharding.rewrite.context.ShardingSQLRewriteContextDecorator;
 import org.apache.shardingsphere.sharding.rewrite.engine.ShardingSQLRewriteEngine;
+import org.apache.shardingsphere.sql.parser.sql.statement.SQLStatement;
 import org.apache.shardingsphere.underlying.rewrite.context.SQLRewriteContext;
 import org.apache.shardingsphere.underlying.rewrite.engine.SQLRewriteResult;
 
@@ -64,8 +65,16 @@ public abstract class BaseShardingEngine {
      * @return SQL route result
      */
     public SQLRouteResult shard(final String sql, final List<Object> parameters) {
+
+        //调用模板方法准备参数
         List<Object> clonedParameters = cloneParameters(parameters);
+
+        /**
+         * 执行路由 {@link #executeRoute(String, List)}
+         */
         SQLRouteResult result = executeRoute(sql, clonedParameters);
+
+        //执行 SQL 转换（Convert）和改写（Rewrite）
         result.getRouteUnits().addAll(HintManager.isDatabaseShardingOnly() ? convert(sql, clonedParameters, result) : rewriteAndConvert(sql, clonedParameters, result));
         boolean showSQL = shardingProperties.getValue(ShardingPropertiesConstant.SQL_SHOW);
         if (showSQL) {
@@ -74,14 +83,20 @@ public abstract class BaseShardingEngine {
         }
         return result;
     }
-    
+
+    // 模板方法- 拷贝参数
     protected abstract List<Object> cloneParameters(List<Object> parameters);
-    
+
+    // 模板方法- 执行路由
     protected abstract SQLRouteResult route(String sql, List<Object> parameters);
     
     private SQLRouteResult executeRoute(final String sql, final List<Object> clonedParameters) {
         routingHook.start(sql);
         try {
+
+            /**
+             *  [ShardingRoute 实现] {@link org.apache.shardingsphere.core.route.router.sharding.ShardingRouter#route(String, List, SQLStatement)}
+             */
             SQLRouteResult result = route(sql, clonedParameters);
             routingHook.finishSuccess(result, metaData.getTables());
             return result;

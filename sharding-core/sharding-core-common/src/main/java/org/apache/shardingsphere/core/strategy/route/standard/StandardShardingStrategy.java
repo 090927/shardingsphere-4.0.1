@@ -36,13 +36,17 @@ import java.util.TreeSet;
  * Standard sharding strategy.
  * 
  * @author zhangliang
+ *
+ *  标准 分片策略，提供对 SQL 语句中的 =, >, <, >=, <=, IN 和 BETWEEN AND 等操作的分片支持。
  */
 public final class StandardShardingStrategy implements ShardingStrategy {
     
     private final String shardingColumn;
-    
+
+    // 用于处理 =，in 的分片
     private final PreciseShardingAlgorithm preciseShardingAlgorithm;
-    
+
+    // 用于处理 BETWEEN AND，>,<,>=,<= 分片
     private final RangeShardingAlgorithm rangeShardingAlgorithm;
     
     public StandardShardingStrategy(final StandardShardingStrategyConfiguration standardShardingStrategyConfig) {
@@ -56,8 +60,14 @@ public final class StandardShardingStrategy implements ShardingStrategy {
     @Override
     public Collection<String> doSharding(final Collection<String> availableTargetNames, final Collection<RouteValue> shardingValues) {
         RouteValue shardingValue = shardingValues.iterator().next();
+
+        //如果分片值是一个列表，则执行 PreciseShardingAlgorithm
         Collection<String> shardingResult = shardingValue instanceof ListRouteValue
-                ? doSharding(availableTargetNames, (ListRouteValue) shardingValue) : doSharding(availableTargetNames, (RangeRouteValue) shardingValue);
+                //如果分片值是一个列表，则执行 PreciseShardingAlgorithm
+                ? doSharding(availableTargetNames, (ListRouteValue) shardingValue)
+
+                //如果分片值是一个范围，则 执行RangeShardingAlgorithm
+                : doSharding(availableTargetNames, (RangeRouteValue) shardingValue);
         Collection<String> result = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         result.addAll(shardingResult);
         return result;
@@ -68,6 +78,8 @@ public final class StandardShardingStrategy implements ShardingStrategy {
         if (null == rangeShardingAlgorithm) {
             throw new UnsupportedOperationException("Cannot find range sharding strategy in sharding rule.");
         }
+
+        // 使用 RangeShardingAlgorithm 进行分片
         return rangeShardingAlgorithm.doSharding(availableTargetNames, 
                 new RangeShardingValue(shardingValue.getTableName(), shardingValue.getColumnName(), shardingValue.getValueRange()));
     }
@@ -76,6 +88,8 @@ public final class StandardShardingStrategy implements ShardingStrategy {
     private Collection<String> doSharding(final Collection<String> availableTargetNames, final ListRouteValue<?> shardingValue) {
         Collection<String> result = new LinkedList<>();
         for (Comparable<?> each : shardingValue.getValues()) {
+
+            //使用 PreciseShardingAlgorithm 进行分片
             String target = preciseShardingAlgorithm.doSharding(availableTargetNames, new PreciseShardingValue(shardingValue.getTableName(), shardingValue.getColumnName(), each));
             if (null != target) {
                 result.add(target);

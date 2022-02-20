@@ -27,6 +27,8 @@ public final class PreciseModuloDatabaseShardingAlgorithm implements PreciseShar
     @Override
     public String doSharding(final Collection<String> availableTargetNames, final PreciseShardingValue<Integer> shardingValue) {
         for (String each : availableTargetNames) {
+
+            // 根据分片值执行对 2的取模操作
             if (each.endsWith(shardingValue.getValue() % 2 + "")) {
                 return each;
             }

@@ -9,5 +9,8 @@
   
 > 分片引擎
 
-- SQL 解析引擎 （使用外观模式）
+* [x] SQL 解析引擎 （使用外观模式）
   - `SQLParseEngine` 核心类，同时委托 `SQLParseKernel`
+* [x] SQL 路由
+  -`ShardingRouter` 核心类, 
+  - `RoutingEngineFactory` 负责生成这些具体的 `RoutingEngine`（分片路由）

@@ -27,6 +27,8 @@ import java.util.Collection;
  * @author zhangliang
  * 
  * @param <T> class type of sharding value
+ *
+ *           用于处理 =，in 的分片
  */
 public interface PreciseShardingAlgorithm<T extends Comparable<?>> extends ShardingAlgorithm {
     

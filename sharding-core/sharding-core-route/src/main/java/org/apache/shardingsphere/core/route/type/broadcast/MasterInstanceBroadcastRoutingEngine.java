@@ -43,6 +43,8 @@ public final class MasterInstanceBroadcastRoutingEngine implements RoutingEngine
         RoutingResult result = new RoutingResult();
         for (String each : shardingRule.getShardingDataSourceNames().getDataSourceNames()) {
             if (dataSourceMetas.getAllInstanceDataSourceNames().contains(each)) {
+
+                // 通过 MasterSlaveRule 获取主从数据库信息
                 Optional<MasterSlaveRule> masterSlaveRule = shardingRule.findMasterSlaveRule(each);
                 if (!masterSlaveRule.isPresent() || masterSlaveRule.get().getMasterDataSourceName().equals(each)) {
                     result.getRoutingUnits().add(new RoutingUnit(each));

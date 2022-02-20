@@ -47,6 +47,8 @@ import java.util.Set;
  * Table rule.
  *
  * @author zhangliang
+ *
+ *  TableRule 属于分配规则 ShardingRule 中的一部分。
  */
 @Getter
 @ToString(exclude = {"dataNodeIndexMap", "actualTables", "actualDatasourceNames", "datasourceToTablesMap"})

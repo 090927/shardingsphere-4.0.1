@@ -51,6 +51,7 @@ public final class UnicastRoutingEngine implements RoutingEngine {
     public RoutingResult route() {
         RoutingResult result = new RoutingResult();
         if (shardingRule.isAllBroadcastTables(logicTables)) {
+            // 如果都是广播表，则对每个logicTable组装TableUnit，再构建RoutingUnit
             List<TableUnit> tableUnits = new ArrayList<>(logicTables.size());
             for (String each : logicTables) {
                 tableUnits.add(new TableUnit(each, each));
@@ -59,8 +60,12 @@ public final class UnicastRoutingEngine implements RoutingEngine {
             routingUnit.getTableUnits().addAll(tableUnits);
             result.getRoutingUnits().add(routingUnit);
         } else if (logicTables.isEmpty()) {
+            // 如果表为 null，则直接组装 RoutingUnit，不用构建 TableUnit
+
             result.getRoutingUnits().add(new RoutingUnit(shardingRule.getShardingDataSourceNames().getRandomDataSourceName()));
         } else if (1 == logicTables.size()) {
+            // 如果只有一张表，则组装RoutingUnit和单个表的TableUnit
+
             String logicTableName = logicTables.iterator().next();
             if (!shardingRule.findTableRule(logicTableName).isPresent()) {
                 result.getRoutingUnits().add(new RoutingUnit(shardingRule.getShardingDataSourceNames().getRandomDataSourceName()));
@@ -71,6 +76,8 @@ public final class UnicastRoutingEngine implements RoutingEngine {
             routingUnit.getTableUnits().add(new TableUnit(logicTableName, dataNode.getTableName()));
             result.getRoutingUnits().add(routingUnit);
         } else {
+            // 如果存在多个实体表，则先获取DataSource，再组装RoutingUnit和TableUnit
+
             List<TableUnit> tableUnits = new ArrayList<>(logicTables.size());
             Set<String> availableDatasourceNames = null;
             boolean first = true;

@@ -270,6 +270,10 @@ public final class ShardingStatement extends AbstractStatementAdapter {
     private void shard(final String sql) {
         ShardingRuntimeContext runtimeContext = connection.getRuntimeContext();
         SimpleQueryShardingEngine shardingEngine = new SimpleQueryShardingEngine(runtimeContext.getRule(), runtimeContext.getProps(), runtimeContext.getMetaData(), runtimeContext.getParseEngine());
+
+        /**
+         * 获取 分片路由 {@link org.apache.shardingsphere.core.BaseShardingEngine#shard(String, List)}
+         */
         sqlRouteResult = shardingEngine.shard(sql, Collections.emptyList());
     }
     

@@ -27,6 +27,8 @@ import java.util.Collection;
  * @author zhangliang
  * 
  * @param <T> class type of sharding value
+ *
+ *      用于处理 BETWEEN AND，>,<,>=,<= 分片
  */
 public interface RangeShardingAlgorithm<T extends Comparable<?>> extends ShardingAlgorithm {
     

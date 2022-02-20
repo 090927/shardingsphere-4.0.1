@@ -48,8 +48,12 @@ public final class SQLStatementContextFactory {
      * @param parameters SQL parameters
      * @param sqlStatement SQL statement
      * @return SQL statement context
+     *
+     *  工厂模式
      */
     public static SQLStatementContext newInstance(final RelationMetas relationMetas, final String sql, final List<Object> parameters, final SQLStatement sqlStatement) {
+
+        // 根据不同 “sqlStatement” 返回不同上下文
         if (sqlStatement instanceof SelectStatement) {
             return new SelectSQLStatementContext(relationMetas, sql, parameters, (SelectStatement) sqlStatement);
         }

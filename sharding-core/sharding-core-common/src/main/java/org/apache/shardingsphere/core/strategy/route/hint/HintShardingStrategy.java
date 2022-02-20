@@ -33,6 +33,8 @@ import java.util.TreeSet;
  * Hint sharding strategy.
  * 
  * @author zhangliang
+ *
+ *  Hint 分片策略
  */
 public final class HintShardingStrategy implements ShardingStrategy {
     
@@ -44,14 +46,23 @@ public final class HintShardingStrategy implements ShardingStrategy {
     public HintShardingStrategy(final HintShardingStrategyConfiguration hintShardingStrategyConfig) {
         Preconditions.checkNotNull(hintShardingStrategyConfig.getShardingAlgorithm(), "Sharding algorithm cannot be null.");
         shardingColumns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+
+        // 从配置中获取 HintShardingAlgorithm
         shardingAlgorithm = hintShardingStrategyConfig.getShardingAlgorithm();
     }
     
     @SuppressWarnings("unchecked")
+    /**
+     * 根据 Hint 信息执行分片
+     */
     @Override
     public Collection<String> doSharding(final Collection<String> availableTargetNames, final Collection<RouteValue> shardingValues) {
         ListRouteValue shardingValue = (ListRouteValue) shardingValues.iterator().next();
-        Collection<String> shardingResult = shardingAlgorithm.doSharding(availableTargetNames, 
+
+        /**
+         *  唯一实现类 {@link org.apache.shardingsphere.shardingjdbc.orchestration.spring.algorithm.DefaultHintShardingAlgorithm
+         */
+        Collection<String> shardingResult = shardingAlgorithm.doSharding(availableTargetNames,
                 new HintShardingValue(shardingValue.getTableName(), shardingValue.getColumnName(), shardingValue.getValues()));
         Collection<String> result = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         result.addAll(shardingResult);

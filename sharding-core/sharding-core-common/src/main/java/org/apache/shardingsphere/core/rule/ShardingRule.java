@@ -50,25 +50,35 @@ import java.util.TreeSet;
  */
 @Getter
 public class ShardingRule implements BaseRule {
-    
+
+    // 分片规则配置类，封装各种配置项信息
     private final ShardingRuleConfiguration ruleConfiguration;
-    
+
+    // DataSource 名称列表
     private final ShardingDataSourceNames shardingDataSourceNames;
-    
+
+    // 针对表的规则列表
     private final Collection<TableRule> tableRules;
-    
+
+    // 针对 ‘绑定表‘ 的规则列表
     private final Collection<BindingTableRule> bindingTableRules;
-    
+
+    // 广播表名称列表
     private final Collection<String> broadcastTables;
-    
+
+    // 默认的数据库分片策略
     private final ShardingStrategy defaultDatabaseShardingStrategy;
-    
+
+    // 默认的数据表分片策略
     private final ShardingStrategy defaultTableShardingStrategy;
-    
+
+    // 默认的分片键生成器
     private final ShardingKeyGenerator defaultShardingKeyGenerator;
-    
+
+    // 针对读写分离的规则列表
     private final Collection<MasterSlaveRule> masterSlaveRules;
-    
+
+    // 加密规则
     private final EncryptRule encryptRule;
     
     public ShardingRule(final ShardingRuleConfiguration shardingRuleConfig, final Collection<String> dataSourceNames) {
@@ -106,7 +116,10 @@ public class ShardingRule implements BaseRule {
         }
         return result;
     }
-    
+
+    /**
+     * ShardingRule 会对其进行解析，并生成 BindingTableRule.
+     */
     private BindingTableRule createBindingTableRule(final String bindingTableGroup) {
         List<TableRule> tableRules = new LinkedList<>();
         for (String each : Splitter.on(",").trimResults().splitToList(bindingTableGroup)) {
@@ -224,17 +237,27 @@ public class ShardingRule implements BaseRule {
      *
      * @param logicTableNames logic table names
      * @return logic tables is all belong to binding encryptors or not
+     *
+     * 多表互为绑定表关系进行判定
      */
     public boolean isAllBindingTables(final Collection<String> logicTableNames) {
         if (logicTableNames.isEmpty()) {
             return false;
         }
+
+        /**
+         * 通过传入的 `logicTableNames` 构建一个专门的 `BindingTableRule` {@link #findBindingTableRule(String)}
+         */
         Optional<BindingTableRule> bindingTableRule = findBindingTableRule(logicTableNames);
         if (!bindingTableRule.isPresent()) {
             return false;
         }
         Collection<String> result = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+
+        // 获取 `BindingTableRule` 中的 `LogicTable`
         result.addAll(bindingTableRule.get().getAllLogicTables());
+
+        // 判断获取的 `LogicTable` 是否与传入的 `logicTableNames` 一致
         return !result.isEmpty() && result.containsAll(logicTableNames);
     }
     

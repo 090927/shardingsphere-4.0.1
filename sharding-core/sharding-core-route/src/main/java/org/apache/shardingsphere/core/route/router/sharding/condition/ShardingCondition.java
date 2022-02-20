@@ -35,8 +35,10 @@ import java.util.List;
 @Getter
 @ToString
 public class ShardingCondition {
-    
+
+    // 路由信息
     private final List<RouteValue> routeValues = new LinkedList<>();
-    
+
+    // 节点信息
     private final Collection<DataNode> dataNodes = new LinkedList<>();
 }

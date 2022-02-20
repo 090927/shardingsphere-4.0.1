@@ -36,7 +36,13 @@ public final class ShardingInsertStatementValidator implements ShardingStatement
     
     @Override
     public void validate(final ShardingRule shardingRule, final InsertStatement sqlStatement, final List<Object> parameters) {
+
+        /**
+         *  查询,是否存在 `OnDuplicateKeyColumn` {@link org.apache.shardingsphere.sql.parser.sql.statement.generic.AbstractSQLStatement#findSQLSegments(Class)}
+         */
         Optional<OnDuplicateKeyColumnsSegment> onDuplicateKeyColumnsSegment = sqlStatement.findSQLSegment(OnDuplicateKeyColumnsSegment.class);
+
+        // 如果是 "ON DUPLICATE KEY UPDATE" 语句，且如果当前操作的是分片 Column 时，验证不通过
         if (onDuplicateKeyColumnsSegment.isPresent() && isUpdateShardingKey(shardingRule, onDuplicateKeyColumnsSegment.get(), sqlStatement.getTable().getTableName())) {
             throw new ShardingException("INSERT INTO .... ON DUPLICATE KEY UPDATE can not support update for sharding column.");
         }

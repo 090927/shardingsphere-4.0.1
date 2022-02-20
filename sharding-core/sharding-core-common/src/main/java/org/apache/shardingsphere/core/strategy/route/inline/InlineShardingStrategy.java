@@ -37,11 +37,15 @@ import java.util.TreeSet;
  * Standard sharding strategy.
  * 
  * @author zhangliang
+ *
+ *  行表达式分片策略 InlineShardingStrategy
  */
 public final class InlineShardingStrategy implements ShardingStrategy {
-    
+
+    // 分片列
     private final String shardingColumn;
-    
+
+    // Groovy 中的 Closure 实例
     private final Closure<?> closure;
     
     public InlineShardingStrategy(final InlineShardingStrategyConfiguration inlineShardingStrategyConfig) {
@@ -69,6 +73,10 @@ public final class InlineShardingStrategy implements ShardingStrategy {
     private Collection<String> doSharding(final ListRouteValue shardingValue) {
         Collection<String> result = new LinkedList<>();
         for (PreciseShardingValue<?> each : transferToPreciseShardingValues(shardingValue)) {
+
+            /**
+             *  execute 方法解析出，最终结果 {@link #execute(PreciseShardingValue)} 
+             */
             result.add(execute(each));
         }
         return result;
@@ -84,9 +92,13 @@ public final class InlineShardingStrategy implements ShardingStrategy {
     }
     
     private String execute(final PreciseShardingValue shardingValue) {
+
+        //构建 Groovy 的 Closure对象
         Closure<?> result = closure.rehydrate(new Expando(), null, null);
         result.setResolveStrategy(Closure.DELEGATE_ONLY);
         result.setProperty(shardingColumn, shardingValue.getValue());
+
+        //获取解析结果
         return result.call().toString();
     }
     

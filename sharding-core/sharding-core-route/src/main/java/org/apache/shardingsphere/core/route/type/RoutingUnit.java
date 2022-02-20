@@ -40,11 +40,14 @@ import java.util.Set;
 @EqualsAndHashCode
 @ToString
 public final class RoutingUnit {
-    
+
+    //真实数据源名
     private final String dataSourceName;
-    
+
+    //逻辑数据源名
     private final String masterSlaveLogicDataSourceName;
-    
+
+    //表单元列表
     private final List<TableUnit> tableUnits = new LinkedList<>();
     
     public RoutingUnit(final String dataSourceName) {

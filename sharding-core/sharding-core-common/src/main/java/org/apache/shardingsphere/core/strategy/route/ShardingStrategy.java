@@ -32,6 +32,8 @@ public interface ShardingStrategy {
      * Get sharding columns.
      * 
      * @return sharding columns
+     *
+     * 获取分片 Column
      */
     Collection<String> getShardingColumns();
     
@@ -41,6 +43,8 @@ public interface ShardingStrategy {
      * @param availableTargetNames available data sources or tables's names
      * @param shardingValues sharding values
      * @return sharding results for data sources or tables's names
+     *
+     * 执行分片
      */
     Collection<String> doSharding(Collection<String> availableTargetNames, Collection<RouteValue> shardingValues);
 }

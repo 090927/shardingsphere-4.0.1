@@ -33,8 +33,10 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 public final class RouteUnit {
-    
+
+    // 数据源名
     private final String dataSourceName;
-    
+
+    // SQL 单元
     private final SQLUnit sqlUnit;
 }

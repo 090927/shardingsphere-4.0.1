@@ -48,6 +48,7 @@ import org.apache.shardingsphere.sql.parser.relation.statement.impl.SelectSQLSta
 import org.apache.shardingsphere.sql.parser.sql.statement.SQLStatement;
 import org.apache.shardingsphere.sql.parser.sql.statement.dml.DMLStatement;
 import org.apache.shardingsphere.sql.parser.sql.statement.dml.InsertStatement;
+import org.apache.shardingsphere.sql.parser.sql.statement.dml.UpdateStatement;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -63,11 +64,13 @@ import java.util.List;
  */
 @RequiredArgsConstructor
 public final class ShardingRouter {
-    
+
+    // 基础配置类，代表分片的各种规则信息
     private final ShardingRule shardingRule;
     
     private final ShardingSphereMetaData metaData;
-    
+
+    // SQL 解析引擎
     private final SQLParseEngine parseEngine;
     
     private final List<Comparable<?>> generatedValues = new LinkedList<>();
@@ -82,8 +85,13 @@ public final class ShardingRouter {
      * @param logicSQL logic SQL
      * @param useCache use cache to save SQL parse result or not
      * @return parse result
+     *
+     *  logicSQL 命名，以便区别在，分片和读写分离情况下的真实SQL。
      */
     public SQLStatement parse(final String logicSQL, final boolean useCache) {
+        /**
+         * SQL 解析,返回一个 SQLStatement 对象 {@link SQLParseEngine#parse(String, boolean)}
+         */
         return parseEngine.parse(logicSQL, useCache);
     }
     
@@ -97,42 +105,83 @@ public final class ShardingRouter {
      */
     @SuppressWarnings("unchecked")
     public SQLRouteResult route(final String logicSQL, final List<Object> parameters, final SQLStatement sqlStatement) {
+
+        /**
+         * 分片合理性验证 {@link ShardingStatementValidatorFactory#newInstance(SQLStatement)}
+         */
         Optional<ShardingStatementValidator> shardingStatementValidator = ShardingStatementValidatorFactory.newInstance(sqlStatement);
         if (shardingStatementValidator.isPresent()) {
+
+            /**
+             *  1、验证分片合理性
+             *      {@link org.apache.shardingsphere.core.route.router.sharding.validator.impl.ShardingInsertStatementValidator#validate(ShardingRule, InsertStatement, List)}
+             *      {@link org.apache.shardingsphere.core.route.router.sharding.validator.impl.ShardingUpdateStatementValidator#validate(ShardingRule, UpdateStatement, List)}
+             */
             shardingStatementValidator.get().validate(shardingRule, sqlStatement, parameters);
         }
+
+        /**
+         * 2、获取上下文 {@link SQLStatementContextFactory#newInstance(RelationMetas, String, List, SQLStatement)}
+         */
         SQLStatementContext sqlStatementContext = SQLStatementContextFactory.newInstance(metaData.getRelationMetas(), logicSQL, parameters, sqlStatement);
 
         /**
-         * 主键生成方案 {@link GeneratedKey#getGenerateKey(ShardingRule, TableMetas, List, InsertStatement)}
+         * 3、主键生成方案 {@link GeneratedKey#getGenerateKey(ShardingRule, TableMetas, List, InsertStatement)}
          */
         Optional<GeneratedKey> generatedKey = sqlStatement instanceof InsertStatement
                 ? GeneratedKey.getGenerateKey(shardingRule, metaData.getTables(), parameters, (InsertStatement) sqlStatement) : Optional.<GeneratedKey>absent();
+
+        /**
+         * 4、创建分片条件 {@link #getShardingConditions(List, SQLStatementContext, GeneratedKey, RelationMetas)}
+         */
         ShardingConditions shardingConditions = getShardingConditions(parameters, sqlStatementContext, generatedKey.orNull(), metaData.getRelationMetas());
         boolean needMergeShardingValues = isNeedMergeShardingValues(sqlStatementContext);
         if (sqlStatementContext.getSqlStatement() instanceof DMLStatement && needMergeShardingValues) {
             checkSubqueryShardingValues(sqlStatementContext, shardingConditions);
             mergeShardingConditions(shardingConditions);
         }
+
+        /**
+         * 5、基于 SQLStatement 生成具体 RoutingEngine  {@link RoutingEngineFactory#newInstance(ShardingRule, ShardingSphereMetaData, SQLStatementContext, ShardingConditions)}
+         */
         RoutingEngine routingEngine = RoutingEngineFactory.newInstance(shardingRule, metaData, sqlStatementContext, shardingConditions);
+
+        // 执行结果
         RoutingResult routingResult = routingEngine.route();
         if (needMergeShardingValues) {
             Preconditions.checkState(1 == routingResult.getRoutingUnits().size(), "Must have one sharding with subquery.");
         }
+
+        /**
+         * 6、执行路由结果
+         */
         SQLRouteResult result = new SQLRouteResult(sqlStatementContext, shardingConditions, generatedKey.orNull());
         result.setRoutingResult(routingResult);
+
+        // 如果是 Insert 语句，则设置自动生成分片键
         if (sqlStatementContext instanceof InsertSQLStatementContext) {
             setGeneratedValues(result);
         }
         return result;
     }
-    
+
+    /**
+     * 创建分片条件
+     */
     private ShardingConditions getShardingConditions(final List<Object> parameters, final SQLStatementContext sqlStatementContext, final GeneratedKey generatedKey, final RelationMetas relationMetas) {
+
+        // 根据，输入的SQL 类型。创建不同的分片条件。
         if (sqlStatementContext.getSqlStatement() instanceof DMLStatement) {
+
+            // 如果是 InsertSQLStatement 上下文
             if (sqlStatementContext instanceof InsertSQLStatementContext) {
                 InsertSQLStatementContext shardingInsertStatement = (InsertSQLStatementContext) sqlStatementContext;
+
+                //通过 InsertClauseShardingConditionEngine 创建分片条件
                 return new ShardingConditions(new InsertClauseShardingConditionEngine(shardingRule).createShardingConditions(shardingInsertStatement, generatedKey, parameters));
             }
+
+            // 否则直接通过 WhereClauseShardingConditionEngine 创建分片条件
             return new ShardingConditions(new WhereClauseShardingConditionEngine(shardingRule, relationMetas).createShardingConditions(sqlStatementContext.getSqlStatement(), parameters));
         }
         return new ShardingConditions(Collections.<ShardingCondition>emptyList());

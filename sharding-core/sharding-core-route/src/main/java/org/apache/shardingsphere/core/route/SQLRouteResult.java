@@ -40,15 +40,20 @@ import java.util.LinkedHashSet;
 @Getter
 @Setter
 public final class SQLRouteResult {
-    
+
+    // SQLStatement 上下文
     private final SQLStatementContext sqlStatementContext;
-    
+
+    // 分片条件
     private final ShardingConditions shardingConditions;
-    
+
+    // 自动生成分片键
     private final GeneratedKey generatedKey;
-    
+
+    // 一组路由单元
     private final Collection<RouteUnit> routeUnits = new LinkedHashSet<>();
-    
+
+    // 由 RoutingEngine 生成的 RoutingResult
     private RoutingResult routingResult;
     
     public SQLRouteResult(final SQLStatementContext sqlStatementContext, final ShardingConditions shardingConditions) {

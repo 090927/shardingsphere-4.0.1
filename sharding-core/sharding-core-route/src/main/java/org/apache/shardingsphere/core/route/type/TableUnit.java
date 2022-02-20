@@ -32,8 +32,9 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 public final class TableUnit {
-    
+
+    // 逻辑表名
     private final String logicTableName;
-    
+    // 真实表名
     private final String actualTableName;
 }

@@ -43,6 +43,8 @@ public final class ShardingStrategyFactory {
      * 
      * @param shardingStrategyConfig sharding strategy configuration
      * @return sharding strategy instance
+     *
+     *  工厂方法。
      */
     public static ShardingStrategy newInstance(final ShardingStrategyConfiguration shardingStrategyConfig) {
         if (shardingStrategyConfig instanceof StandardShardingStrategyConfiguration) {

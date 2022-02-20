@@ -58,6 +58,8 @@ public final class GeneratedKey {
      * @param parameters SQL parameters
      * @param insertStatement insert statement
      * @return generate key
+     *
+     *  获取自动生成主键
      */
     public static Optional<GeneratedKey> getGenerateKey(final ShardingRule shardingRule, final TableMetas tableMetas, final List<Object> parameters, final InsertStatement insertStatement) {
 

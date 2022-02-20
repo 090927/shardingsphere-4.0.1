@@ -55,6 +55,8 @@ import java.util.List;
  * @author zhangliang
  * @author maxiaoguang
  * @author panjuan
+ *
+ *  分片路由
  */
 @RequiredArgsConstructor
 public final class StandardRoutingEngine implements RoutingEngine {
@@ -72,6 +74,12 @@ public final class StandardRoutingEngine implements RoutingEngine {
         if (isDMLForModify(sqlStatementContext.getSqlStatement()) && !sqlStatementContext.getTablesContext().isSingleTable()) {
             throw new ShardingException("Cannot support Multiple-Table for '%s'.", sqlStatementContext.getSqlStatement());
         }
+
+        /**
+         *  运行路由机制
+         *   1、获取数据节点信息 {@link #getDataNodes(TableRule)}
+         *   2、组装路由结果，并返回一个 RoutingResult {@link #generateRoutingResult(Collection)}
+         */
         return generateRoutingResult(getDataNodes(shardingRule.getTableRule(logicTableName)));
     }
     
@@ -82,7 +90,11 @@ public final class StandardRoutingEngine implements RoutingEngine {
     private RoutingResult generateRoutingResult(final Collection<DataNode> routedDataNodes) {
         RoutingResult result = new RoutingResult();
         for (DataNode each : routedDataNodes) {
+
+            // 根据每个 DataNode 构建一个 RoutingUnit 对象
             RoutingUnit routingUnit = new RoutingUnit(each.getDataSourceName());
+
+            //填充 RoutingUnit 中的 TableUnit
             routingUnit.getTableUnits().add(new TableUnit(logicTableName, each.getTableName()));
             result.getRoutingUnits().add(routingUnit);
         }
@@ -90,16 +102,37 @@ public final class StandardRoutingEngine implements RoutingEngine {
     }
     
     private Collection<DataNode> getDataNodes(final TableRule tableRule) {
+        /**
+         * 如基于Hint进行路由
+         *  1、判断是否根据 Hint 来进行路由 {@link #isRoutingByHint(TableRule)}
+         */
         if (isRoutingByHint(tableRule)) {
             return routeByHint(tableRule);
         }
+
+        /**
+         * 基于分片条件进行路由
+         *  1、判断是否根据分片条件，进行路由 {@link #isRoutingByShardingConditions(TableRule)}
+         */
         if (isRoutingByShardingConditions(tableRule)) {
             return routeByShardingConditions(tableRule);
         }
+
+        /**
+         * 执行混合路由 {@link #routeByMixedConditions(TableRule)}
+         *
+         *   - 无 ShardingCondition
+         *      执行 {@link #routeByMixedConditionsWithHint(TableRule)}
+         *   - 有 ShardingCondition
+         *      执行 {@link #routeByMixedConditionsWithCondition(TableRule)}
+         */
         return routeByMixedConditions(tableRule);
     }
     
     private boolean isRoutingByHint(final TableRule tableRule) {
+        /**
+         * 根据 DatabaseShardingStrategy 和 TableShardingStrategy 是否为 HintShardingStrategy
+         */
         return shardingRule.getDatabaseShardingStrategy(tableRule) instanceof HintShardingStrategy && shardingRule.getTableShardingStrategy(tableRule) instanceof HintShardingStrategy;
     }
     
@@ -145,6 +178,8 @@ public final class StandardRoutingEngine implements RoutingEngine {
         if (shardingRule.getDatabaseShardingStrategy(tableRule) instanceof HintShardingStrategy) {
             return route0(tableRule, getDatabaseShardingValuesFromHint(), Collections.<RouteValue>emptyList());
         }
+
+        // 核心执行逻辑
         return route0(tableRule, Collections.<RouteValue>emptyList(), getTableShardingValuesFromHint());
     }
     
@@ -189,8 +224,12 @@ public final class StandardRoutingEngine implements RoutingEngine {
     }
     
     private Collection<DataNode> route0(final TableRule tableRule, final List<RouteValue> databaseShardingValues, final List<RouteValue> tableShardingValues) {
+
+        //路由 DataSource
         Collection<String> routedDataSources = routeDataSources(tableRule, databaseShardingValues);
         Collection<DataNode> result = new LinkedList<>();
+
+        // 路由Table，并完成 DataNode集合的拼装
         for (String each : routedDataSources) {
             result.addAll(routeTables(tableRule, each, tableShardingValues));
         }

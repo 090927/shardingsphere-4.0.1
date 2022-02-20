@@ -37,6 +37,8 @@ public interface ShardingStatementValidator<T extends SQLStatement> {
      * @param shardingRule sharding rule
      * @param sqlStatement SQL statement
      * @param parameters SQL  parameters
+     *
+     *   验证分片操作是否支持
      */
     void validate(ShardingRule shardingRule, T sqlStatement, List<Object> parameters);
 }
