@@ -59,11 +59,20 @@ public final class DQLMergeEngine implements MergeEngine {
     
     @Override
     public MergedResult merge() throws SQLException {
+        // 如果结果集数量为 1
         if (1 == queryResults.size()) {
+
+            // 只需要调用，结果集进行归并即可。这种类似，属于遍历归并。
             return new IteratorStreamMergedResult(queryResults);
         }
         Map<String, Integer> columnLabelIndexMap = getColumnLabelIndexMap(queryResults.get(0));
         selectSQLStatementContext.setIndexes(columnLabelIndexMap);
+
+        /**
+         * 如果结果集数量大于 1，则构建不同的归并方案
+         *  1、build {@link #build(Map)}
+         *  2、分页归并 {@link #decorate(MergedResult)}
+         */
         return decorate(build(columnLabelIndexMap));
     }
     
@@ -76,16 +85,34 @@ public final class DQLMergeEngine implements MergeEngine {
     }
     
     private MergedResult build(final Map<String, Integer> columnLabelIndexMap) throws SQLException {
+
+        // 查询语句中 [分组语句或者聚合函数] 不为空，则执行分组归并
         if (isNeedProcessGroupBy()) {
             return getGroupByMergedResult(columnLabelIndexMap);
         }
+
+        // 如果聚合中存在 [Distinct 列，设置分组 Context] 并执行分组归并
         if (isNeedProcessDistinctRow()) {
             setGroupByForDistinctRow();
+
+            /**
+             * 分组归并 {@link #getGroupByMergedResult(Map)}
+             */
             return getGroupByMergedResult(columnLabelIndexMap);
         }
+
+        // [排序语句不为空]，则执行,排序结果集归并
         if (isNeedProcessOrderBy()) {
+
+            /**
+             *  排序归并 {@link OrderByStreamMergedResult#next()}
+             */
             return new OrderByStreamMergedResult(queryResults, selectSQLStatementContext.getOrderByContext().getItems());
         }
+
+        /**
+         * 如果都不满足归并提交，则执行 [遍历结果集归并]  {@link IteratorStreamMergedResult#next()}
+         */
         return new IteratorStreamMergedResult(queryResults);
     }
     
@@ -104,7 +131,14 @@ public final class DQLMergeEngine implements MergeEngine {
             selectSQLStatementContext.getGroupByContext().getItems().add(orderByItem);
         }
     }
-    
+
+    /**
+     * 分组归并
+     *
+     *   isSameGroupByAndOrderByItems:  判断就是用来明确分组条件、和排序条件是否相同
+     *      相同使用流式分组归并 {@link GroupByStreamMergedResult}
+     *      不相同,使用内存分组归并 {@link GroupByMemoryMergedResult}
+     */
     private MergedResult getGroupByMergedResult(final Map<String, Integer> columnLabelIndexMap) throws SQLException {
         return selectSQLStatementContext.isSameGroupByAndOrderByItems()
                 ? new GroupByStreamMergedResult(columnLabelIndexMap, queryResults, selectSQLStatementContext)
@@ -114,12 +148,17 @@ public final class DQLMergeEngine implements MergeEngine {
     private boolean isNeedProcessOrderBy() {
         return !selectSQLStatementContext.getOrderByContext().getItems().isEmpty();
     }
-    
+
+    /**
+     * 装饰者归并，用于针对不同的数据库方言，完成 ‘分页归并操作‘。
+     */
     private MergedResult decorate(final MergedResult mergedResult) throws SQLException {
         PaginationContext paginationContext = selectSQLStatementContext.getPaginationContext();
         if (!paginationContext.isHasPagination() || 1 == queryResults.size()) {
             return mergedResult;
         }
+
+        //根据不同的数据库类型对相应的分页结果集执行归并
         String trunkDatabaseName = DatabaseTypes.getTrunkDatabaseType(databaseType.getName()).getName();
         if ("MySQL".equals(trunkDatabaseName) || "PostgreSQL".equals(trunkDatabaseName)) {
             return new LimitDecoratorMergedResult(mergedResult, paginationContext);

@@ -18,3 +18,6 @@
   - `SQLRewriteEngine`核心类
 * [x] SQL 执行
   - `ShardingExecuteEngine` 分片执行引入的入口类
+* [x] 归并引擎
+  - `MergeEngine`
+    1. 核心 `DQLMergeEngine#merge()`

@@ -30,6 +30,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Round-robin slave database load-balance algorithm.
  *
  * @author zhangliang
+ *
+ *  轮询算法
  */
 @Getter
 @Setter
@@ -49,6 +51,8 @@ public final class RoundRobinMasterSlaveLoadBalanceAlgorithm implements MasterSl
         AtomicInteger count = COUNTS.containsKey(name) ? COUNTS.get(name) : new AtomicInteger(0);
         COUNTS.putIfAbsent(name, count);
         count.compareAndSet(slaveDataSourceNames.size(), 0);
+
+        // 轮询策略
         return slaveDataSourceNames.get(Math.abs(count.getAndIncrement()) % slaveDataSourceNames.size());
     }
 }

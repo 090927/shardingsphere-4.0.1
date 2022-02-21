@@ -35,6 +35,8 @@ public interface MasterSlaveLoadBalanceAlgorithm extends TypeBasedSPI {
      * @param masterDataSourceName name of master data sources
      * @param slaveDataSourceNames names of slave data sources
      * @return name of selected data source
+     *
+     *  在从库列表中选择一个从库进行路由
      */
     String getDataSource(String name, String masterDataSourceName, List<String> slaveDataSourceNames);
 }

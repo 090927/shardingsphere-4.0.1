@@ -78,21 +78,39 @@ public final class MasterSlaveStatement extends AbstractStatementAdapter {
         if (Strings.isNullOrEmpty(sql)) {
             throw new SQLException(SQLExceptionConstant.SQL_STRING_NULL_OR_EMPTY);
         }
+
+        // 清除 StatementExecutor 中的相关变量
         clearPrevious();
+
+        // 通过 MasterSlaveRouter 获取目标 DataSource
         Collection<String> dataSourceNames = masterSlaveRouter.route(sql, false);
         Preconditions.checkState(1 == dataSourceNames.size(), "Cannot support executeQuery for DML or DDL");
+
+        // 从 Connection 中获取 Statement
         Statement statement = connection.getConnection(dataSourceNames.iterator().next()).createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
         routedStatements.add(statement);
+
+        /**
+         * 执行查询并返回结果
+         */
         return statement.executeQuery(sql);
     }
     
     @Override
     public int executeUpdate(final String sql) throws SQLException {
+
+        // 清除 StatementExecutor 中的相关变量
         clearPrevious();
         int result = 0;
         for (String each : masterSlaveRouter.route(sql, false)) {
+
+            // 从 Connection 中获取 Statement
             Statement statement = connection.getConnection(each).createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
             routedStatements.add(statement);
+
+            /**
+             * 执行更新
+             */
             result += statement.executeUpdate(sql);
         }
         return result;

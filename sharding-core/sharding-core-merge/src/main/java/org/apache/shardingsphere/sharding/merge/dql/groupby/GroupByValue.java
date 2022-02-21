@@ -45,6 +45,8 @@ public final class GroupByValue {
     private List<?> getGroupByValues(final QueryResult queryResult, final Collection<OrderByItem> groupByItems) throws SQLException {
         List<Object> result = new ArrayList<>(groupByItems.size());
         for (OrderByItem each : groupByItems) {
+
+            // 从结果集 QueryResult 中获得每个分组条件的值
             result.add(queryResult.getValue(each.getIndex(), Object.class));
         }
         return result;

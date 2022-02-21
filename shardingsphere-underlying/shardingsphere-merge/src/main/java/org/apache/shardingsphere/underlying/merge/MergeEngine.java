@@ -31,6 +31,8 @@ public interface MergeEngine {
      *
      * @return merged result set.
      * @throws SQLException SQL exception
+     *
+     *  执行归并
      */
     MergedResult merge() throws SQLException;
 }

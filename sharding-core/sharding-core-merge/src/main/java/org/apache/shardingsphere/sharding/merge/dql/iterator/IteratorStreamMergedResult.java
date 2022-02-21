@@ -28,6 +28,8 @@ import java.util.List;
  * Stream merged result for iterator.
  *
  * @author zhangliang
+ *
+ *  遍历归并，代表的是一种流式合并结果
  */
 public final class IteratorStreamMergedResult extends StreamMergedResult {
     
@@ -46,6 +48,8 @@ public final class IteratorStreamMergedResult extends StreamMergedResult {
         if (!queryResults.hasNext()) {
             return false;
         }
+
+        // 流式获取结果并设置为当前的 [ QueryResult ]
         setCurrentQueryResult(queryResults.next());
         boolean hasNext = getCurrentQueryResult().next();
         if (hasNext) {

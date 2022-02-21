@@ -23,6 +23,7 @@ import com.google.common.collect.Maps;
 import org.apache.shardingsphere.sharding.merge.dql.groupby.aggregation.AggregationUnit;
 import org.apache.shardingsphere.sharding.merge.dql.groupby.aggregation.AggregationUnitFactory;
 import org.apache.shardingsphere.sharding.merge.dql.orderby.OrderByStreamMergedResult;
+import org.apache.shardingsphere.sql.parser.core.constant.AggregationType;
 import org.apache.shardingsphere.sql.parser.relation.segment.select.projection.impl.AggregationDistinctProjection;
 import org.apache.shardingsphere.sql.parser.relation.segment.select.projection.impl.AggregationProjection;
 import org.apache.shardingsphere.sql.parser.relation.statement.impl.SelectSQLStatementContext;
@@ -40,6 +41,8 @@ import java.util.Map.Entry;
  * Stream merged result for group by.
  *
  * @author zhangliang
+ *
+ *  分组归并
  */
 public final class GroupByStreamMergedResult extends OrderByStreamMergedResult {
     
@@ -54,12 +57,16 @@ public final class GroupByStreamMergedResult extends OrderByStreamMergedResult {
         super(queryResults, selectSQLStatementContext.getOrderByContext().getItems());
         this.selectSQLStatementContext = selectSQLStatementContext;
         currentRow = new ArrayList<>(labelAndIndexMap.size());
+
+        // 如果优先级队列不为空，就将队列中第一个元素的分组值赋值给 currentGroupByValues 变量
         currentGroupByValues = getOrderByValuesQueue().isEmpty()
                 ? Collections.emptyList() : new GroupByValue(getCurrentQueryResult(), selectSQLStatementContext.getGroupByContext().getItems()).getGroupValues();
     }
     
     @Override
     public boolean next() throws SQLException {
+
+        // 清除当前结果记录
         currentRow.clear();
         if (getOrderByValuesQueue().isEmpty()) {
             return false;
@@ -67,7 +74,11 @@ public final class GroupByStreamMergedResult extends OrderByStreamMergedResult {
         if (isFirstNext()) {
             super.next();
         }
+
+        // 顺序合并相同分组条件的记录
         if (aggregateCurrentGroupByRowAndNext()) {
+
+            // 生成下一条结果记录分组值
             currentGroupByValues = new GroupByValue(getCurrentQueryResult(), selectSQLStatementContext.getGroupByContext().getItems()).getGroupValues();
         }
         return true;
@@ -75,22 +86,43 @@ public final class GroupByStreamMergedResult extends OrderByStreamMergedResult {
     
     private boolean aggregateCurrentGroupByRowAndNext() throws SQLException {
         boolean result = false;
+
+        // 生成计算单元
         Map<AggregationProjection, AggregationUnit> aggregationUnitMap = Maps.toMap(
+
+                // 通过 selectSQLStatementContext 获取 select 语句所有聚合类型的项
                 selectSQLStatementContext.getProjectionsContext().getAggregationProjections(), new Function<AggregationProjection, AggregationUnit>() {
                     
                     @Override
+                    // 通过工厂方法获取具体的聚合单元
                     public AggregationUnit apply(final AggregationProjection input) {
+
+                        /**
+                         * 聚合单元对象工厂类 {@link AggregationUnitFactory#create(AggregationType, boolean)}
+                         */
                         return AggregationUnitFactory.create(input.getType(), input instanceof AggregationDistinctProjection);
                     }
                 });
+
+        // 循环顺序合并相同分组条件的记录
         while (currentGroupByValues.equals(new GroupByValue(getCurrentQueryResult(), selectSQLStatementContext.getGroupByContext().getItems()).getGroupValues())) {
+
+            /**
+             * 计算聚合值 {@link #aggregate(Map)}
+             */
             aggregate(aggregationUnitMap);
             cacheCurrentRow();
+
+            // 获取下一条记录，调用父类中的next方法从而使得currentResultSet指向下一个元素
             result = super.next();
+
+            // 如果值已经遍历完毕，则结束循环
             if (!result) {
                 break;
             }
         }
+
+        // 设置当前记录的聚合字段结果
         setAggregationValueToCurrentRow(aggregationUnitMap);
         return result;
     }
@@ -105,6 +137,8 @@ public final class GroupByStreamMergedResult extends OrderByStreamMergedResult {
                     values.add(getAggregationValue(each));
                 }
             }
+
+            // 计算聚合值
             entry.getValue().merge(values);
         }
     }

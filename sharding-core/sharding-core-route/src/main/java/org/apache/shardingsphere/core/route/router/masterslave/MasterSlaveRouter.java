@@ -61,10 +61,14 @@ public final class MasterSlaveRouter {
     }
     
     private Collection<String> route(final SQLStatement sqlStatement) {
+
+        // 如果是强制主库路由
         if (isMasterRoute(sqlStatement)) {
             MasterVisitedManager.setMasterVisited();
             return Collections.singletonList(masterSlaveRule.getMasterDataSourceName());
         }
+
+        // 通过负载均衡执行从库路由
         return Collections.singletonList(masterSlaveRule.getLoadBalanceAlgorithm().getDataSource(
                 masterSlaveRule.getName(), masterSlaveRule.getMasterDataSourceName(), new ArrayList<>(masterSlaveRule.getSlaveDataSourceNames())));
     }

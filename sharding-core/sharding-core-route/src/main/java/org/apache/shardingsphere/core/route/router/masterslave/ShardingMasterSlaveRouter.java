@@ -47,6 +47,9 @@ public final class ShardingMasterSlaveRouter {
      */
     public SQLRouteResult route(final SQLRouteResult sqlRouteResult) {
         for (MasterSlaveRule each : masterSlaveRules) {
+            /**
+             *  根据每条 MasterSlaveRule 执行路由方法 {@link #route(MasterSlaveRule, SQLRouteResult)}
+             */
             route(each, sqlRouteResult);
         }
         return sqlRouteResult;
@@ -61,10 +64,14 @@ public final class ShardingMasterSlaveRouter {
             }
             toBeRemoved.add(each);
             String actualDataSourceName;
+
+            // 判断是否走主库
             if (isMasterRoute(sqlRouteResult.getSqlStatementContext().getSqlStatement())) {
                 MasterVisitedManager.setMasterVisited();
                 actualDataSourceName = masterSlaveRule.getMasterDataSourceName();
             } else {
+
+                // 如果从库有多个，默认采用轮询策略，也可以选择随机访问策略
                 actualDataSourceName = masterSlaveRule.getLoadBalanceAlgorithm().getDataSource(
                         masterSlaveRule.getName(), masterSlaveRule.getMasterDataSourceName(), new ArrayList<>(masterSlaveRule.getSlaveDataSourceNames()));
             }
@@ -73,7 +80,8 @@ public final class ShardingMasterSlaveRouter {
         sqlRouteResult.getRoutingResult().getRoutingUnits().removeAll(toBeRemoved);
         sqlRouteResult.getRoutingResult().getRoutingUnits().addAll(toBeAdded);
     }
-    
+
+    // 判断是否走，主库
     private boolean isMasterRoute(final SQLStatement sqlStatement) {
         return containsLockSegment(sqlStatement) || !(sqlStatement instanceof SelectStatement) || MasterVisitedManager.isMasterVisited() || HintManager.isMasterRouteOnly();
     }

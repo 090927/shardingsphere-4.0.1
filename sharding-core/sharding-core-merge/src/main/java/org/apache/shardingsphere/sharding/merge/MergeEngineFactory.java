@@ -53,9 +53,15 @@ public final class MergeEngineFactory {
      */
     public static MergeEngine newInstance(final DatabaseType databaseType, final ShardingRule shardingRule,
                                           final SQLRouteResult routeResult, final RelationMetas relationMetas, final List<QueryResult> queryResults) {
+
+        /**
+         * 如果是查询语句，就创建一个 {@link DQLMergeEngine#merge()}
+         */
         if (routeResult.getSqlStatementContext() instanceof SelectSQLStatementContext) {
             return new DQLMergeEngine(databaseType, (SelectSQLStatementContext) routeResult.getSqlStatementContext(), queryResults);
-        } 
+        }
+
+        // 如果是数据库管理语句，就创建一个 DALMergeEngine
         if (routeResult.getSqlStatementContext().getSqlStatement() instanceof DALStatement) {
             return new DALMergeEngine(shardingRule, queryResults, routeResult.getSqlStatementContext(), relationMetas);
         }
