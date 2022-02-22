@@ -28,6 +28,7 @@ import org.apache.shardingsphere.core.rule.MasterSlaveRule;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Sharding with master-slave router interface.
@@ -71,7 +72,12 @@ public final class ShardingMasterSlaveRouter {
                 actualDataSourceName = masterSlaveRule.getMasterDataSourceName();
             } else {
 
-                // 如果从库有多个，默认采用轮询策略，也可以选择随机访问策略
+                /**
+                 * 如果从库有多个，默认采用 '轮询策略'，也可以选择 '随机访问' 策略
+                 *
+                 *   随机算法 {@link org.apache.shardingsphere.core.strategy.masterslave.RandomMasterSlaveLoadBalanceAlgorithm#getDataSource(String, String, List)}
+                 *   轮询算法 {@link org.apache.shardingsphere.core.strategy.masterslave.RoundRobinMasterSlaveLoadBalanceAlgorithm#getDataSource(String, String, List)}
+                 */
                 actualDataSourceName = masterSlaveRule.getLoadBalanceAlgorithm().getDataSource(
                         masterSlaveRule.getName(), masterSlaveRule.getMasterDataSourceName(), new ArrayList<>(masterSlaveRule.getSlaveDataSourceNames()));
             }

@@ -38,6 +38,10 @@ public final class ResourceDataSource {
     public ResourceDataSource(final String originalName, final DataSource dataSource) {
         this.originalName = originalName;
         this.dataSource = dataSource;
+
+        /**
+         * 构建一个唯一资源名称,单例模式 {@link ResourceIDGenerator#nextId()}
+         */
         this.uniqueResourceName = ResourceIDGenerator.getInstance().nextId() + originalName;
     }
 }

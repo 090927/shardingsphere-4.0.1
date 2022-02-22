@@ -35,6 +35,8 @@ public final class DatabaseTypes {
     private static final Map<String, DatabaseType> DATABASE_TYPES = new HashMap<>();
     
     static {
+
+        // SPI 机制
         for (DatabaseType each : ServiceLoader.load(DatabaseType.class)) {
             DATABASE_TYPES.put(each.getName(), each);
         }

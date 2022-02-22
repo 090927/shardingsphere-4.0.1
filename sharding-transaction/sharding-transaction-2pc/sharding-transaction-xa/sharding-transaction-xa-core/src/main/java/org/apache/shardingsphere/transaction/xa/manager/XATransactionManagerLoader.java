@@ -36,7 +36,10 @@ import java.util.ServiceLoader;
 public final class XATransactionManagerLoader {
     
     private static final XATransactionManagerLoader INSTANCE = new XATransactionManagerLoader();
-    
+
+    /**
+     * XATransactionManager {@link XATransactionManager}
+     */
     private final XATransactionManager transactionManager;
     
     private XATransactionManagerLoader() {
@@ -44,6 +47,8 @@ public final class XATransactionManagerLoader {
     }
     
     private XATransactionManager load() {
+
+        // JDK-SPI 机制,加载 XATransactionManager 实现类
         Iterator<XATransactionManager> xaTransactionManagers = ServiceLoader.load(XATransactionManager.class).iterator();
         if (!xaTransactionManagers.hasNext()) {
             return new AtomikosTransactionManager();

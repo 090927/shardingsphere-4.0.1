@@ -44,6 +44,8 @@ public final class XAConnectionFactory {
      * @param connection normal connection
      * @param xaDataSource XA data source
      * @return XA connection
+     *
+     * 基于普通 Connection 创建 XAConnection
      */
     public static XAConnection createXAConnection(final DatabaseType databaseType, final XADataSource xaDataSource, final Connection connection) {
         switch (databaseType.getName()) {

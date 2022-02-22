@@ -67,7 +67,15 @@ public final class ShardingRuntimeContext extends AbstractRuntimeContext<Shardin
         super(rule, props, databaseType);
         cachedDatabaseMetaData = createCachedDatabaseMetaData(dataSourceMap, rule);
         metaData = createMetaData(dataSourceMap, rule, databaseType);
+
+        /**
+         *  创建分布式事务管理引擎并初始化 {@link ShardingTransactionManagerEngine
+         */
         shardingTransactionManagerEngine = new ShardingTransactionManagerEngine();
+
+        /**
+         * 初始化,分布式事务管理引擎 {@link ShardingTransactionManagerEngine#init(DatabaseType, Map)}
+         */
         shardingTransactionManagerEngine.init(databaseType, dataSourceMap);
     }
     

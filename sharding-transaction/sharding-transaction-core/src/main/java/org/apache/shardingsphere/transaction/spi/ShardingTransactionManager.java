@@ -29,7 +29,9 @@ import java.util.Collection;
  * Sharding transaction manager.
  *
  * @author zhaojun
- * 
+ *
+ *   XA 分布式事务 {@link org.apache.shardingsphere.transaction.xa.XAShardingTransactionManager}
+ *   Seata 分布式事务 {@link org.apache.shardingsphere.transaction.base.seata.at.SeataATShardingTransactionManager}
  */
 public interface ShardingTransactionManager extends AutoCloseable {
     
@@ -38,6 +40,8 @@ public interface ShardingTransactionManager extends AutoCloseable {
      *
      * @param databaseType database type
      * @param resourceDataSources resource data sources
+     *
+     *  根据数据库类型和 ResourceDataSource 进行初始化
      */
     void init(DatabaseType databaseType, Collection<ResourceDataSource> resourceDataSources);
     
@@ -45,6 +49,8 @@ public interface ShardingTransactionManager extends AutoCloseable {
      * Get transaction type.
      *
      * @return transaction type
+     *
+     *  获取 TransactionType
      */
     TransactionType getTransactionType();
     
@@ -52,6 +58,8 @@ public interface ShardingTransactionManager extends AutoCloseable {
      * Judge is in transaction or not.
      * 
      * @return in transaction or not
+     *
+     *  判断是否在事务中
      */
     boolean isInTransaction();
     
@@ -61,21 +69,29 @@ public interface ShardingTransactionManager extends AutoCloseable {
      * @param dataSourceName data source name
      * @return connection
      * @throws SQLException SQL exception
+     *
+     * 获取支持事务的 Connection
      */
     Connection getConnection(String dataSourceName) throws SQLException;
     
     /**
      * Begin transaction.
+     *
+     *  开始事务
      */
     void begin();
     
     /**
      * Commit transaction.
+     *
+     *  提交事务
      */
     void commit();
     
     /**
      * Rollback transaction.
+     *
+     *  回滚事务
      */
     void rollback();
 }

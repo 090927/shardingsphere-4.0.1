@@ -37,6 +37,8 @@ public final class XADataSourceDefinitionFactory {
     private static final Map<DatabaseType, XADataSourceDefinition> XA_DATA_SOURCE_DEFINITIONS = new HashMap<>();
     
     static {
+
+        // SPI 机制，加载 XADataSourceDefinition 实现类
         for (XADataSourceDefinition each : ServiceLoader.load(XADataSourceDefinition.class)) {
             XA_DATA_SOURCE_DEFINITIONS.put(DatabaseTypes.getActualDatabaseType(each.getDatabaseType()), each);
         }

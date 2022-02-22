@@ -85,11 +85,29 @@ public final class XATransactionDataSource implements AutoCloseable {
         if (CONTAINER_DATASOURCE_NAMES.contains(dataSource.getClass().getSimpleName())) {
             return dataSource.getConnection();
         }
+
+        //从DataSource中 构建一个 Connection
         Connection result = dataSource.getConnection();
+
+        /**
+         *  获取 XAConnection {@link XAConnectionFactory#createXAConnection(DatabaseType, XADataSource, Connection)}
+         */
         XAConnection xaConnection = XAConnectionFactory.createXAConnection(databaseType, xaDataSource, result);
+
+        /**
+         * 获取，XATransaction
+         *   {@link org.apache.shardingsphere.transaction.xa.atomikos.manager.AtomikosTransactionManager
+         *   {@link org.apache.shardingsphere.transaction.xa.bitronix.manager.BitronixXATransactionManager
+         */
         final Transaction transaction = xaTransactionManager.getTransactionManager().getTransaction();
+
+        // 判当前线程中是否存在这个 Transaction
         if (!enlistedTransactions.get().contains(transaction)) {
+
+            //将 XAConnection 中的 XAResource 与目标 Transaction 对象关联起来
             transaction.enlistResource(new SingleXAResource(resourceName, xaConnection.getXAResource()));
+
+            //Transaction 中注册一个 Synchronization 接口
             transaction.registerSynchronization(new Synchronization() {
                 @Override
                 public void beforeCompletion() {
@@ -101,6 +119,8 @@ public final class XATransactionDataSource implements AutoCloseable {
                     enlistedTransactions.get().clear();
                 }
             });
+
+            //将该 Transaction 对象放入到当前线程中
             enlistedTransactions.get().add(transaction);
         }
         return result;
@@ -109,6 +129,7 @@ public final class XATransactionDataSource implements AutoCloseable {
     @Override
     public void close() {
         if (!CONTAINER_DATASOURCE_NAMES.contains(dataSource.getClass().getSimpleName())) {
+            // 将资源进行移出
             xaTransactionManager.removeRecoveryResource(resourceName, xaDataSource);
         } else {
             close(dataSource);

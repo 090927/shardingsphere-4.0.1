@@ -22,6 +22,7 @@ import org.apache.shardingsphere.spi.database.DatabaseType;
 import org.apache.shardingsphere.transaction.core.ResourceDataSource;
 import org.apache.shardingsphere.transaction.core.TransactionType;
 import org.apache.shardingsphere.transaction.spi.ShardingTransactionManager;
+import org.apache.shardingsphere.transaction.xa.atomikos.manager.AtomikosTransactionManager;
 import org.apache.shardingsphere.transaction.xa.jta.datasource.XATransactionDataSource;
 import org.apache.shardingsphere.transaction.xa.manager.XATransactionManagerLoader;
 import org.apache.shardingsphere.transaction.xa.spi.XATransactionManager;
@@ -43,14 +44,25 @@ import java.util.Map;
 public final class XAShardingTransactionManager implements ShardingTransactionManager {
     
     private final Map<String, XATransactionDataSource> cachedDataSources = new HashMap<>();
-    
+
+    /**
+     *  使用单例 + SPI 机制 {@link XATransactionManagerLoader#getInstance()}
+     */
     private final XATransactionManager xaTransactionManager = XATransactionManagerLoader.getInstance().getTransactionManager();
     
     @Override
     public void init(final DatabaseType databaseType, final Collection<ResourceDataSource> resourceDataSources) {
         for (ResourceDataSource each : resourceDataSources) {
+
+            // 创建XATransactionDataSource并进行缓存
             cachedDataSources.put(each.getOriginalName(), new XATransactionDataSource(databaseType, each.getUniqueResourceName(), each.getDataSource(), xaTransactionManager));
         }
+
+        /**
+         * 初始化 XATransactionManager
+         *   {@link AtomikosTransactionManager#init()}
+         *   {@link org.apache.shardingsphere.transaction.xa.bitronix.manager.BitronixXATransactionManager#init()
+         */
         xaTransactionManager.init();
     }
     

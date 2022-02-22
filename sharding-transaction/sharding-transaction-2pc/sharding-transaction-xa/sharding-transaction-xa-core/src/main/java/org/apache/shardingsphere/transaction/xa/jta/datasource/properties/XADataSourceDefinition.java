@@ -34,6 +34,8 @@ public interface XADataSourceDefinition extends DatabaseTypeAwareSPI {
      * Get XA driver class names.
      * 
      * @return XA driver class names
+     *
+     * 获取 XA 驱动类名
      */
     Collection<String> getXADriverClassName();
     
@@ -42,6 +44,8 @@ public interface XADataSourceDefinition extends DatabaseTypeAwareSPI {
      *
      * @param databaseAccessConfiguration database access configuration
      * @return properties for XA
+     *
+     *  获取 XA 属性
      */
     Properties getXAProperties(DatabaseAccessConfiguration databaseAccessConfiguration);
 }

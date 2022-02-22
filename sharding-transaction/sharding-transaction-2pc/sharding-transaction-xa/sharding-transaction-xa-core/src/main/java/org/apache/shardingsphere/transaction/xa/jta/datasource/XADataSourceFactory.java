@@ -62,6 +62,10 @@ public final class XADataSourceFactory {
      */
     @SneakyThrows
     public static XADataSource build(final DatabaseType databaseType, final DataSource dataSource) {
+
+        /**
+         * 工厂方法 {@link XADataSourceDefinitionFactory#getXADataSourceDefinition(DatabaseType)} 
+         */
         XADataSourceDefinition xaDataSourceDefinition = XADataSourceDefinitionFactory.getXADataSourceDefinition(databaseType);
         XADataSource result = createXADataSource(xaDataSourceDefinition);
         Properties xaProperties = xaDataSourceDefinition.getXAProperties(SWAPPER.swap(dataSource));

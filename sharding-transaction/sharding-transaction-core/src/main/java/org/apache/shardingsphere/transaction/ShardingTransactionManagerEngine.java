@@ -48,6 +48,10 @@ public final class ShardingTransactionManagerEngine {
     }
     
     private void loadShardingTransactionManager() {
+
+        /**
+         *  JDK-SPI 机制，加载 {@link ShardingTransactionManager 实现类
+         */
         for (ShardingTransactionManager each : ServiceLoader.load(ShardingTransactionManager.class)) {
             if (transactionManagerMap.containsKey(each.getTransactionType())) {
                 log.warn("Find more than one {} transaction manager implementation class, use `{}` now",
@@ -65,7 +69,18 @@ public final class ShardingTransactionManagerEngine {
      * @param dataSourceMap data source map
      */
     public void init(final DatabaseType databaseType, final Map<String, DataSource> dataSourceMap) {
+
+        /**
+         *  初始化 {@link #transactionManagerMap
+         */
         for (Entry<TransactionType, ShardingTransactionManager> entry : transactionManagerMap.entrySet()) {
+
+            /**
+             * 初始化 TransactionManager
+             *
+             *  1、XA 事务管理器 {@link org.apache.shardingsphere.transaction.xa.XAShardingTransactionManager#init(DatabaseType, Collection)}
+             *  2、Seata 事务管理器 {@link org.apache.shardingsphere.transaction.base.seata.at.SeataATShardingTransactionManager#init(DatabaseType, Collection)}
+             */
             entry.getValue().init(databaseType, getResourceDataSources(dataSourceMap));
         }
     }
@@ -73,6 +88,9 @@ public final class ShardingTransactionManagerEngine {
     private Collection<ResourceDataSource> getResourceDataSources(final Map<String, DataSource> dataSourceMap) {
         List<ResourceDataSource> result = new LinkedList<>();
         for (Map.Entry<String, DataSource> entry : dataSourceMap.entrySet()) {
+            /**
+             * 创建 {@link ResourceDataSource 对象
+             */
             result.add(new ResourceDataSource(entry.getKey(), entry.getValue()));
         }
         return result;
