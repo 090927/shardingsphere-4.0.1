@@ -30,6 +30,8 @@ public interface ParsingHook {
      * Handle when parse started.
      *
      * @param sql SQL to be parsed
+     *
+     *  开始 Parse 时进行 Hook
      */
     void start(String sql);
     
@@ -37,6 +39,8 @@ public interface ParsingHook {
      * Handle when parse finished success.
      *
      * @param sqlStatement sql statement
+     *
+     *   成功完成 Parse 时进行 Hook
      */
     void finishSuccess(SQLStatement sqlStatement);
     
@@ -44,6 +48,8 @@ public interface ParsingHook {
      * Handle when parse finished failure.
      * 
      * @param cause failure cause
+     *
+     *   Parse 失败时进行 Hook
      */
     void finishFailure(Exception cause);
 }

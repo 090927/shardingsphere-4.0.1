@@ -34,6 +34,8 @@ public interface RegistryCenter extends TypeBasedSPI {
      * Initialize registry center.
      * 
      * @param config registry center configuration
+     *
+     *               根据配置信息初始化注册中心
      */
     void init(RegistryCenterConfiguration config);
     
@@ -44,6 +46,8 @@ public interface RegistryCenter extends TypeBasedSPI {
      * 
      * @param key key of data
      * @return value of data
+     *
+     *  获取数据
      */
     String get(String key);
     
@@ -54,6 +58,8 @@ public interface RegistryCenter extends TypeBasedSPI {
      *
      * @param key key of data
      * @return value of data
+     *
+     *   直接获取数据
      */
     String getDirectly(String key);
     
@@ -62,6 +68,8 @@ public interface RegistryCenter extends TypeBasedSPI {
      * 
      * @param key key of data
      * @return data is existed or not
+     *
+     *  是否存在数据项
      */
     boolean isExisted(String key);
     
@@ -70,6 +78,8 @@ public interface RegistryCenter extends TypeBasedSPI {
      *
      * @param key key of data
      * @return sub-nodes name list
+     *
+     *  获取子数据项列表
      */
     List<String> getChildrenKeys(String key);
     
@@ -78,6 +88,8 @@ public interface RegistryCenter extends TypeBasedSPI {
      * 
      * @param key key of data
      * @param value value of data
+     *
+     *      持久化数据项
      */
     void persist(String key, String value);
     
@@ -86,6 +98,8 @@ public interface RegistryCenter extends TypeBasedSPI {
      *
      * @param key key of data
      * @param value value of data
+     *
+     *       更新数据项
      */
     void update(String key, String value);
     
@@ -94,6 +108,8 @@ public interface RegistryCenter extends TypeBasedSPI {
      *
      * @param key key of data
      * @param value value of data
+     *
+     *    持久化临时数据
      */
     void persistEphemeral(String key, String value);
     
@@ -102,11 +118,15 @@ public interface RegistryCenter extends TypeBasedSPI {
      *
      * @param key key of data
      * @param dataChangedEventListener data changed event listener
+     *
+     *      对数据项或路径进行监听
      */
     void watch(String key, DataChangedEventListener dataChangedEventListener);
     
     /**
      * Close.
+     *
+     *  关闭注册中心
       */
     void close();
 
@@ -114,6 +134,8 @@ public interface RegistryCenter extends TypeBasedSPI {
      * Initialize the lock of the key.
      *
      * @param key key of data
+     *
+     *            对数据项，初始化锁
      */
     void initLock(String key);
 
@@ -121,11 +143,15 @@ public interface RegistryCenter extends TypeBasedSPI {
      * Try to get the lock of the key.
      *
      * @return get the lock or not
+     *
+     *  对数据项获取锁
      */
     boolean tryLock();
 
     /**
      * Try to release the lock of the key.
+     *
+     *  对数据项，释放锁
      *
      */
     void tryRelease();

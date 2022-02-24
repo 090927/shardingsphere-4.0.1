@@ -36,7 +36,8 @@ import java.util.Collection;
  */
 @RequiredArgsConstructor
 public abstract class PostShardingOrchestrationEventListener implements ShardingOrchestrationListener {
-    
+
+    // 创建 EventBus, 单例模式
     private final EventBus eventBus = ShardingOrchestrationEventBus.getInstance();
     
     private final RegistryCenter regCenter;

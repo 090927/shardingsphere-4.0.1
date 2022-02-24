@@ -21,3 +21,8 @@
 * [x] 归并引擎
   - `MergeEngine`
     1. 核心 `DQLMergeEngine#merge()`
+
+> ShardingSphere 链路追踪
+
+1. 使用 `OpenTracing API` 发送性能追踪数据。 
+2. 初始化类 `ShardingTracer#init()`

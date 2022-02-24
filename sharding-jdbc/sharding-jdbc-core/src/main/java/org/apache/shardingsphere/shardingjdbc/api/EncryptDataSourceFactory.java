@@ -49,6 +49,10 @@ public final class EncryptDataSourceFactory {
      *  配置类 {@link EncryptRuleConfiguration}
      */
     public static DataSource createDataSource(final DataSource dataSource, final EncryptRuleConfiguration encryptRuleConfiguration, final Properties props) throws SQLException {
+
+        /**
+         * 数据脱敏,核心对象 {@link EncryptRule
+         */
         return new EncryptDataSource(dataSource, new EncryptRule(encryptRuleConfiguration), props);
     }
 }

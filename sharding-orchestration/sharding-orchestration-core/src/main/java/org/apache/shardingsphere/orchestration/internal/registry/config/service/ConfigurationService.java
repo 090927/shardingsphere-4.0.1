@@ -76,9 +76,17 @@ public final class ConfigurationService {
      */
     public void persistConfiguration(final String shardingSchemaName, final Map<String, DataSourceConfiguration> dataSourceConfigs, final RuleConfiguration ruleConfig,
                                      final Authentication authentication, final Properties props, final boolean isOverwrite) {
+
+        // 保存 DataSource
         persistDataSourceConfiguration(shardingSchemaName, dataSourceConfigs, isOverwrite);
+
+        // 保存 Rule
         persistRuleConfiguration(shardingSchemaName, ruleConfig, isOverwrite);
+
+        // Authentication
         persistAuthentication(authentication, isOverwrite);
+
+        // Properties
         persistProperties(props, isOverwrite);
     }
     

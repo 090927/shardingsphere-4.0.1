@@ -39,9 +39,13 @@ public final class ShardingTracer {
      * Initialize sharding tracer.
      */
     public static void init() {
+
+        //从环境变量中获取 OpenTracing 协议的实现类配置
         String tracerClassName = System.getProperty(OPENTRACING_TRACER_CLASS_NAME);
         Preconditions.checkNotNull(tracerClassName, "Can not find opentracing tracer implementation class via system property `%s`", OPENTRACING_TRACER_CLASS_NAME);
         try {
+
+            // 初始化 OpenTracing 协议的实现类
             init((Tracer) Class.forName(tracerClassName).newInstance());
         } catch (final ReflectiveOperationException ex) {
             throw new ShardingException("Initialize opentracing tracer class failure.", ex);

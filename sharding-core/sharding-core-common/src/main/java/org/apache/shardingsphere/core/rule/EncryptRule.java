@@ -46,11 +46,14 @@ import java.util.Map.Entry;
  * @author panjuan
  */
 public final class EncryptRule implements BaseRule {
-    
+
+    // 加解密器
     private final Map<String, ShardingEncryptor> encryptors = new LinkedHashMap<>();
-    
+
+    // 脱敏数据表
     private final Map<String, EncryptTable> tables = new LinkedHashMap<>();
-    
+
+    // 脱敏规则配置
     @Getter
     private EncryptRuleConfiguration ruleConfiguration;
     
@@ -61,7 +64,11 @@ public final class EncryptRule implements BaseRule {
     public EncryptRule(final EncryptRuleConfiguration encryptRuleConfig) {
         this.ruleConfiguration = encryptRuleConfig;
         Preconditions.checkArgument(isValidRuleConfiguration(), "Invalid encrypt column configurations in EncryptTableRuleConfigurations.");
+
+        // 初始化，加密器- SPI 机制
         initEncryptors(encryptRuleConfig.getEncryptors());
+
+        // 初始化- 脱敏数据表
         initTables(encryptRuleConfig.getTables());
     }
     
@@ -85,6 +92,8 @@ public final class EncryptRule implements BaseRule {
     }
     
     private void initEncryptors(final Map<String, EncryptorRuleConfiguration> encryptors) {
+
+        // SPI 机制
         ShardingEncryptorServiceLoader serviceLoader = new ShardingEncryptorServiceLoader();
         for (Entry<String, EncryptorRuleConfiguration> entry : encryptors.entrySet()) {
             this.encryptors.put(entry.getKey(), createShardingEncryptor(serviceLoader, entry.getValue()));
@@ -261,6 +270,8 @@ public final class EncryptRule implements BaseRule {
             
             @Override
             public Object apply(final Object input) {
+
+                // 执行加密
                 return null == input ? null : String.valueOf(shardingEncryptor.get().encrypt(input.toString()));
             }
         });

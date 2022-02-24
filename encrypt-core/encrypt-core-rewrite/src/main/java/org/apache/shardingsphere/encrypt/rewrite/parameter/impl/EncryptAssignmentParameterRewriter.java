@@ -46,6 +46,8 @@ public final class EncryptAssignmentParameterRewriter extends EncryptParameterRe
     
     @Override
     protected boolean isNeedRewriteForEncrypt(final SQLStatementContext sqlStatementContext) {
+
+        // 1、UpdateStatement、InsertSQLStatementContext
         return sqlStatementContext.getSqlStatement() instanceof UpdateStatement
                 || sqlStatementContext instanceof InsertSQLStatementContext && sqlStatementContext.getSqlStatement().findSQLSegment(SetAssignmentsSegment.class).isPresent();
     }
@@ -53,10 +55,18 @@ public final class EncryptAssignmentParameterRewriter extends EncryptParameterRe
     @Override
     public void rewrite(final ParameterBuilder parameterBuilder, final SQLStatementContext sqlStatementContext, final List<Object> parameters) {
         String tableName = sqlStatementContext.getTablesContext().getSingleTableName();
+
+        // 获取 SetAssignmentsSegment 并进行遍历
         for (AssignmentSegment each : getSetAssignmentsSegment(sqlStatementContext.getSqlStatement()).getAssignments()) {
+
+            // 判断是否存在 ShardingEncryptor
             if (each.getValue() instanceof ParameterMarkerExpressionSegment && getEncryptRule().findShardingEncryptor(tableName, each.getColumn().getName()).isPresent()) {
                 StandardParameterBuilder standardParameterBuilder = parameterBuilder instanceof StandardParameterBuilder
                         ? (StandardParameterBuilder) parameterBuilder : ((GroupedParameterBuilder) parameterBuilder).getParameterBuilders().get(0);
+
+                /**
+                 * 对参数，进行加密 {@link #encryptParameters(StandardParameterBuilder, String, AssignmentSegment, List)}
+                 */
                 encryptParameters(standardParameterBuilder, tableName, each, parameters);
             }
         }
@@ -75,13 +85,22 @@ public final class EncryptAssignmentParameterRewriter extends EncryptParameterRe
         String columnName = assignmentSegment.getColumn().getName();
         int parameterMarkerIndex = ((ParameterMarkerExpressionSegment) assignmentSegment.getValue()).getParameterMarkerIndex();
         Object originalValue = parameters.get(parameterMarkerIndex);
+
+        /**
+         * 通过 ShardingEncryptor 进行加密，并替换原来存储密文的 cipherColumn {@link org.apache.shardingsphere.core.rule.EncryptRule#getEncryptValues(String, String, List)}
+         */
         Object cipherValue = getEncryptRule().getEncryptValues(tableName, columnName, Collections.singletonList(originalValue)).iterator().next();
         parameterBuilder.addReplacedParameters(parameterMarkerIndex, cipherValue);
         Collection<Object> addedParameters = new LinkedList<>();
+
+
+        // 如果存在 assistedQueryColumn，则添加辅助查询字段
         if (getEncryptRule().findAssistedQueryColumn(tableName, columnName).isPresent()) {
             Object assistedQueryValue = getEncryptRule().getEncryptAssistedQueryValues(tableName, columnName, Collections.singletonList(originalValue)).iterator().next();
             addedParameters.add(assistedQueryValue);
         }
+
+        // 如果存在 plainColumn，则添加明文字段
         if (getEncryptRule().findPlainColumn(tableName, columnName).isPresent()) {
             addedParameters.add(originalValue);
         }

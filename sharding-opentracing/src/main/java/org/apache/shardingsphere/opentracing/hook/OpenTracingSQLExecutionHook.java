@@ -77,6 +77,10 @@ public final class OpenTracingSQLExecutionHook implements SQLExecutionHook {
     
     @Override
     public void finishFailure(final Exception cause) {
+
+        /**
+         *  setError {@link ShardingErrorSpan#setError(Span, Exception)}
+         */
         ShardingErrorSpan.setError(span, cause);
         span.finish();
         if (null != activeSpan) {

@@ -37,6 +37,7 @@ import java.util.concurrent.Executor;
 @Slf4j
 public final class NacosRegistryCenter implements RegistryCenter {
 
+    // Nacos 配置 Service
     private ConfigService configService;
 
     @Getter

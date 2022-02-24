@@ -84,6 +84,10 @@ public final class SQLTokenGenerators {
 
                 // 批量生成 SQLToken
             } else if (each instanceof CollectionSQLTokenGenerator) {
+
+                /**
+                 *  生成SQLToken {@link org.apache.shardingsphere.encrypt.rewrite.token.generator.impl.EncryptAssignmentTokenGenerator#generateSQLTokens(SQLStatementContext)} 
+                 */
                 result.addAll(((CollectionSQLTokenGenerator) each).generateSQLTokens(sqlStatementContext));
             }
         }

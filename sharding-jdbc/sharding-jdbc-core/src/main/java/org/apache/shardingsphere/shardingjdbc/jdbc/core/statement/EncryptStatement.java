@@ -79,6 +79,10 @@ public final class EncryptStatement extends AbstractUnsupportedOperationStatemen
         if (Strings.isNullOrEmpty(sql)) {
             throw new SQLException(SQLExceptionConstant.SQL_STRING_NULL_OR_EMPTY);
         }
+
+        /**
+         * 获取改写后的 SQL 并执行 {@link #getRewriteSQL(String)}
+         */
         ResultSet resultSet = statement.executeQuery(getRewriteSQL(sql));
         this.resultSet = new EncryptResultSet(connection.getRuntimeContext(), sqlStatementContext, this, resultSet);
         return this.resultSet;
@@ -91,14 +95,34 @@ public final class EncryptStatement extends AbstractUnsupportedOperationStatemen
     
     @SuppressWarnings("unchecked")
     private String getRewriteSQL(final String sql) {
+
+        //通过 ParseEngine 对 SQL 进行解析
         SQLStatement sqlStatement = connection.getRuntimeContext().getParseEngine().parse(sql, false);
+
+        // 获取关系元数据 RelationMetas
         RelationMetas relationMetas = getRelationMetas(connection.getRuntimeContext().getTableMetas());
+
+        //构建 SQLStatementContext
         sqlStatementContext = SQLStatementContextFactory.newInstance(relationMetas, sql, Collections.emptyList(), sqlStatement);
+
+        //构建 SQLRewriteContext
         SQLRewriteContext sqlRewriteContext = new SQLRewriteContext(relationMetas, sqlStatementContext, sql, Collections.emptyList());
+
+        // 判断是否根据数据脱敏列进行查询
         boolean isQueryWithCipherColumn = connection.getRuntimeContext().getProps().<Boolean>getValue(ShardingPropertiesConstant.QUERY_WITH_CIPHER_COLUMN);
+
+        /**
+         * 构建 {@link EncryptSQLRewriteContextDecorator 对 SQLRewriteContext 进行装饰
+         */
         new EncryptSQLRewriteContextDecorator(connection.getRuntimeContext().getRule(), isQueryWithCipherColumn).decorate(sqlRewriteContext);
+
+        // 生成 SQLTokens
         sqlRewriteContext.generateSQLTokens();
+
+        //使用 DefaultSQLRewriteEngine 进行改写
         String result = new DefaultSQLRewriteEngine().rewrite(sqlRewriteContext).getSql();
+
+        // 打印结果
         showSQL(result);
         return result;
     }

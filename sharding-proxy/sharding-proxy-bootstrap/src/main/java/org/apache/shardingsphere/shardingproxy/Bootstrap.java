@@ -80,6 +80,8 @@ public final class Bootstrap {
         if (null == shardingConfig.getServerConfiguration().getOrchestration()) {
             startWithoutRegistryCenter(shardingConfig.getRuleConfigurationMap(), shardingConfig.getServerConfiguration().getAuthentication(), shardingConfig.getServerConfiguration().getProps(), port);
         } else {
+
+            // 启动
             startWithRegistryCenter(shardingConfig.getServerConfiguration(), shardingConfig.getRuleConfigurationMap().keySet(), shardingConfig.getRuleConfigurationMap(), port);
         }
     }
@@ -99,6 +101,11 @@ public final class Bootstrap {
         ConfigurationLogger.log(prop);
         ShardingProxyContext.getInstance().init(authenticationConfiguration, prop);
         LogicSchemas.getInstance().init(getDataSourceParameterMap(ruleConfigs), getRuleConfiguration(ruleConfigs));
+
+
+        /**
+         * 初始化，OpenTracing {@link #initOpenTracing()}
+         */
         initOpenTracing();
         ShardingProxy.getInstance().start(port);
     }
@@ -107,6 +114,8 @@ public final class Bootstrap {
                                                 final Collection<String> shardingSchemaNames, final Map<String, YamlProxyRuleConfiguration> ruleConfigs, final int port) {
         try (ShardingOrchestrationFacade shardingOrchestrationFacade = new ShardingOrchestrationFacade(
                 new OrchestrationConfigurationYamlSwapper().swap(serverConfig.getOrchestration()), shardingSchemaNames)) {
+
+            // 初始化-注册中心
             initShardingOrchestrationFacade(serverConfig, ruleConfigs, shardingOrchestrationFacade);
             Authentication authentication = shardingOrchestrationFacade.getConfigService().loadAuthentication();
             Properties properties = shardingOrchestrationFacade.getConfigService().loadProperties();
@@ -114,6 +123,9 @@ public final class Bootstrap {
             ConfigurationLogger.log(properties);
             ShardingProxyContext.getInstance().init(authentication, properties);
             LogicSchemas.getInstance().init(shardingSchemaNames, getSchemaDataSourceParameterMap(shardingOrchestrationFacade), getSchemaRules(shardingOrchestrationFacade), true);
+
+
+            // 初始化 OpenTracing
             initOpenTracing();
             ShardingProxy.getInstance().start(port);
         } catch (SQLException e) {
@@ -148,6 +160,10 @@ public final class Bootstrap {
         if (ruleConfigs.isEmpty()) {
             shardingOrchestrationFacade.init();
         } else {
+
+            /**
+             *  初始化注册中心 {@link ShardingOrchestrationFacade#init(Map, Map, Authentication, Properties)}
+             */
             shardingOrchestrationFacade.init(getDataSourceConfigurationMap(ruleConfigs),
                     getRuleConfiguration(ruleConfigs), getAuthentication(serverConfig.getAuthentication()), serverConfig.getProps());
         }
@@ -155,6 +171,10 @@ public final class Bootstrap {
     
     private static void initOpenTracing() {
         if (ShardingProxyContext.getInstance().getShardingProperties().<Boolean>getValue(ShardingPropertiesConstant.PROXY_OPENTRACING_ENABLED)) {
+
+            /**
+             * 初始化 opentracing {@link ShardingTracer#init()}
+             */
             ShardingTracer.init();
         }
     }

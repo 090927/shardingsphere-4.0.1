@@ -42,16 +42,20 @@ import java.util.Properties;
  */
 @Slf4j
 public final class ShardingOrchestrationFacade implements AutoCloseable {
-    
+
+    // 注册中心
     private final RegistryCenter regCenter;
-    
+
     private final boolean isOverwrite;
-    
+
+    // 配置服务
     @Getter
     private final ConfigurationService configService;
-    
+
+    // 状态服务
     private final StateService stateService;
-    
+
+    // 监听管理器
     private final ShardingOrchestrationListenerManager listenerManager;
     
     public ShardingOrchestrationFacade(final OrchestrationConfiguration orchestrationConfig, final Collection<String> shardingSchemaNames) {
@@ -70,10 +74,16 @@ public final class ShardingOrchestrationFacade implements AutoCloseable {
      * @param schemaRuleMap schema rule map
      * @param authentication authentication
      * @param props properties
+     *
+     *               初始化注册中心
      */
     public void init(final Map<String, Map<String, DataSourceConfiguration>> dataSourceConfigurationMap,
                      final Map<String, RuleConfiguration> schemaRuleMap, final Authentication authentication, final Properties props) {
         for (Entry<String, Map<String, DataSourceConfiguration>> entry : dataSourceConfigurationMap.entrySet()) {
+
+            /**
+             *  {@link ConfigurationService#persistConfiguration(String, Map, RuleConfiguration, Authentication, Properties, boolean)}
+             */
             configService.persistConfiguration(entry.getKey(), dataSourceConfigurationMap.get(entry.getKey()), schemaRuleMap.get(entry.getKey()), authentication, props, isOverwrite);
         }
         stateService.persistInstanceOnline();

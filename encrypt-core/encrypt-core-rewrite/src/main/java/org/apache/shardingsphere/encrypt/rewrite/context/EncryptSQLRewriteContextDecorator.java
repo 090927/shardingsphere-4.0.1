@@ -19,11 +19,17 @@ package org.apache.shardingsphere.encrypt.rewrite.context;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.shardingsphere.core.rule.EncryptRule;
+import org.apache.shardingsphere.encrypt.rewrite.parameter.impl.EncryptInsertValueParameterRewriter;
+import org.apache.shardingsphere.encrypt.rewrite.parameter.impl.EncryptPredicateParameterRewriter;
+import org.apache.shardingsphere.sql.parser.relation.statement.SQLStatementContext;
 import org.apache.shardingsphere.underlying.rewrite.context.SQLRewriteContext;
 import org.apache.shardingsphere.underlying.rewrite.context.SQLRewriteContextDecorator;
 import org.apache.shardingsphere.encrypt.rewrite.parameter.EncryptParameterRewriterBuilder;
 import org.apache.shardingsphere.encrypt.rewrite.token.EncryptTokenGenerateBuilder;
+import org.apache.shardingsphere.underlying.rewrite.parameter.builder.ParameterBuilder;
 import org.apache.shardingsphere.underlying.rewrite.parameter.rewriter.ParameterRewriter;
+
+import java.util.List;
 
 /**
  * SQL rewrite context decorator for encrypt.
@@ -41,11 +47,28 @@ public final class EncryptSQLRewriteContextDecorator implements SQLRewriteContex
     
     @Override
     public void decorate(final SQLRewriteContext sqlRewriteContext) {
+
+        /**
+         *  改写SQL {@link EncryptParameterRewriterBuilder#getParameterRewriters()}
+         */
         for (ParameterRewriter each : new EncryptParameterRewriterBuilder(encryptRule, isQueryWithCipherColumn).getParameterRewriters(sqlRewriteContext.getRelationMetas())) {
+
+            // 判断,是否需要改写SQL
             if (!sqlRewriteContext.getParameters().isEmpty() && each.isNeedRewrite(sqlRewriteContext.getSqlStatementContext())) {
+
+                /**
+                 *  执行改写逻辑
+                 *   1、{@link org.apache.shardingsphere.encrypt.rewrite.parameter.impl.EncryptAssignmentParameterRewriter#rewrite(ParameterBuilder, SQLStatementContext, List)}
+                 *   2、{@link EncryptPredicateParameterRewriter#rewrite(ParameterBuilder, SQLStatementContext, List)}
+                 *   3、{@link EncryptInsertValueParameterRewriter#rewrite(ParameterBuilder, SQLStatementContext, List)}
+                 */
                 each.rewrite(sqlRewriteContext.getParameterBuilder(), sqlRewriteContext.getSqlStatementContext(), sqlRewriteContext.getParameters());
             }
         }
+
+        /**
+         * SQLTokenGenerator 初始化
+         */
         sqlRewriteContext.addSQLTokenGenerators(new EncryptTokenGenerateBuilder(encryptRule, isQueryWithCipherColumn).getSQLTokenGenerators());
     }
 }

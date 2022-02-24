@@ -37,6 +37,7 @@ public final class OpenTracingParsingHook implements ParsingHook {
     
     @Override
     public void start(final String sql) {
+        // 创建 Span 并设置 Tag
         span = ShardingTracer.get().buildSpan(OPERATION_NAME)
                 .withTag(Tags.COMPONENT.getKey(), ShardingTags.COMPONENT_NAME)
                 .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
@@ -45,11 +46,14 @@ public final class OpenTracingParsingHook implements ParsingHook {
     
     @Override
     public void finishSuccess(final SQLStatement sqlStatement) {
+        // 成功时，完成 Span
         span.finish();
     }
     
     @Override
     public void finishFailure(final Exception cause) {
+
+        //失败时完成 Span
         ShardingErrorSpan.setError(span, cause);
         span.finish();
     }

@@ -24,16 +24,22 @@ import lombok.RequiredArgsConstructor;
  * Encrypt column rule configuration.
  *
  * @author panjuan
+ *
+ *  通过配置文件，解析
  */
 @RequiredArgsConstructor
 @Getter
 public final class EncryptColumnRuleConfiguration {
-    
+
+    // 存储明文字段
     private final String plainColumn;
-    
+
+    // 存储密文字段
     private final String cipherColumn;
-    
+
+    // 辅助查询字段
     private final String assistedQueryColumn;
-    
+
+    // 加密器名称
     private final String encryptor;
 }

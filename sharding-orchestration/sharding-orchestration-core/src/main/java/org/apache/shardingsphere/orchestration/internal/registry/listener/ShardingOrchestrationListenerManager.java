@@ -30,9 +30,11 @@ import java.util.Collection;
  * @author panjuan
  */
 public final class ShardingOrchestrationListenerManager {
-    
+
+    // 配置变更监听管理器
     private final ConfigurationChangedListenerManager configurationChangedListenerManager;
-    
+
+    // 状态变更监听管理器
     private final StateChangedListenerManager stateChangedListenerManager;
     
     public ShardingOrchestrationListenerManager(final String name, final RegistryCenter regCenter, final Collection<String> shardingSchemaNames) {
