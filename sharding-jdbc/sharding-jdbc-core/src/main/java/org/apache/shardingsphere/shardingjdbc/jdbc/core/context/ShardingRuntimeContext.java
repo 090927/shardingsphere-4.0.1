@@ -66,6 +66,10 @@ public final class ShardingRuntimeContext extends AbstractRuntimeContext<Shardin
          */
         super(rule, props, databaseType);
         cachedDatabaseMetaData = createCachedDatabaseMetaData(dataSourceMap, rule);
+
+        /**
+         * 创建 ShardingSphere 元数据 {@link #createMetaData(Map, ShardingRule, DatabaseType)}
+         */
         metaData = createMetaData(dataSourceMap, rule, databaseType);
 
         /**

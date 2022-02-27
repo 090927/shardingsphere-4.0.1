@@ -115,7 +115,9 @@ public final class PreparedStatementExecutor extends AbstractStatementExecutor {
             }
         };
 
-        // 执行 SQLExecuteCallback 并返回结果
+        /**
+         *  执行 SQLExecuteCallback 并返回结果 {@link AbstractStatementExecutor#executeCallback(SQLExecuteCallback)}
+         */
         return executeCallback(executeCallback);
     }
     

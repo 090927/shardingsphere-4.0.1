@@ -20,6 +20,7 @@ package org.apache.shardingsphere.core.execute.sql.execute;
 import lombok.RequiredArgsConstructor;
 import org.apache.shardingsphere.core.execute.engine.ShardingExecuteEngine;
 import org.apache.shardingsphere.core.execute.engine.ShardingExecuteGroup;
+import org.apache.shardingsphere.core.execute.engine.ShardingGroupExecuteCallback;
 import org.apache.shardingsphere.core.execute.sql.StatementExecuteUnit;
 import org.apache.shardingsphere.core.execute.sql.execute.threadlocal.ExecutorExceptionHandler;
 
@@ -35,6 +36,8 @@ import java.util.List;
  * @author zhangliang
  * @author maxiaoguang
  * @author panjuan
+ *
+ *  模板类，也是 {@link  ShardingExecuteEngine} 的直接使用者
  */
 @RequiredArgsConstructor
 public final class SQLExecuteTemplate {
@@ -71,6 +74,10 @@ public final class SQLExecuteTemplate {
     public <T> List<T> executeGroup(final Collection<ShardingExecuteGroup<? extends StatementExecuteUnit>> sqlExecuteGroups,
                                     final SQLExecuteCallback<T> firstCallback, final SQLExecuteCallback<T> callback) throws SQLException {
         try {
+
+            /**
+             *  [groupExecute] {@link ShardingExecuteEngine#groupExecute(Collection, ShardingGroupExecuteCallback)}
+             */
             return executeEngine.groupExecute((Collection) sqlExecuteGroups, firstCallback, callback, serial);
         } catch (final SQLException ex) {
             ExecutorExceptionHandler.handleException(ex);

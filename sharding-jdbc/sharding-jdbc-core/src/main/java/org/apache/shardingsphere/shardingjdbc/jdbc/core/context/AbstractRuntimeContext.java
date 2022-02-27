@@ -59,10 +59,14 @@ public abstract class AbstractRuntimeContext<T extends BaseRule> implements Runt
         this.rule = rule;
         this.props = new ShardingProperties(null == props ? new Properties() : props);
         this.databaseType = databaseType;
+
+        /**
+         *  [SQL 执行] 分片执行引擎 {@link ShardingExecuteEngine
+         */
         executeEngine = new ShardingExecuteEngine(this.props.<Integer>getValue(ShardingPropertiesConstant.EXECUTOR_SIZE));
 
         /**
-         *  SQLParseEngine SQL 解析工厂方法 {@link SQLParseEngineFactory#getSQLParseEngine(String)}
+         *  [SQL 解析] SQLParseEngine SQL 解析工厂方法 {@link SQLParseEngineFactory#getSQLParseEngine(String)}
          */
         parseEngine = SQLParseEngineFactory.getSQLParseEngine(DatabaseTypes.getTrunkDatabaseTypeName(databaseType));
         ConfigurationLogger.log(rule.getRuleConfiguration());

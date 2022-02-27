@@ -102,9 +102,13 @@ public final class MasterSlavePreparedStatement extends AbstractMasterSlavePrepa
             throw new SQLException(SQLExceptionConstant.SQL_STRING_NULL_OR_EMPTY);
         }
         this.connection = connection;
+
+        //创建 MasterSlaveRouter
         masterSlaveRouter = new MasterSlaveRouter(connection.getRuntimeContext().getRule(), connection.getRuntimeContext().getParseEngine(),
                 connection.getRuntimeContext().getProps().<Boolean>getValue(ShardingPropertiesConstant.SQL_SHOW));
         for (String each : masterSlaveRouter.route(sql, true)) {
+
+            //对每个目标 DataSource 从 Connection 中获取 PreparedStatement
             PreparedStatement preparedStatement = connection.getConnection(each).prepareStatement(sql, columnNames);
             routedStatements.add(preparedStatement);
         }

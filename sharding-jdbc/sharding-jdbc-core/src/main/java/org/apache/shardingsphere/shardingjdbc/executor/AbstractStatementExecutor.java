@@ -150,7 +150,13 @@ public abstract class AbstractStatementExecutor {
      */
     @SuppressWarnings("unchecked")
     protected final <T> List<T> executeCallback(final SQLExecuteCallback<T> executeCallback) throws SQLException {
+
+        /**
+         *  [executeGroup] {@link SQLExecuteTemplate#executeGroup(Collection, SQLExecuteCallback)}
+         */
         List<T> result = sqlExecuteTemplate.executeGroup((Collection) executeGroups, executeCallback);
+
+        // 刷新元数据
         refreshMetaDataIfNeeded(connection.getRuntimeContext(), sqlStatementContext);
         return result;
     }

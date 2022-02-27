@@ -53,6 +53,7 @@ public final class MasterSlaveRouter {
      */
     // TODO for multiple masters may return more than one data source
     public Collection<String> route(final String sql, final boolean useCache) {
+        // [core] route
         Collection<String> result = route(parseEngine.parse(sql, useCache));
         if (showSQL) {
             SQLLogger.logSQL(sql, result);
@@ -68,7 +69,10 @@ public final class MasterSlaveRouter {
             return Collections.singletonList(masterSlaveRule.getMasterDataSourceName());
         }
 
-        // 通过负载均衡执行从库路由
+        /**
+         * 通过负载均衡执行从库路由
+         *   1、负载均衡算法。
+         */
         return Collections.singletonList(masterSlaveRule.getLoadBalanceAlgorithm().getDataSource(
                 masterSlaveRule.getName(), masterSlaveRule.getMasterDataSourceName(), new ArrayList<>(masterSlaveRule.getSlaveDataSourceNames())));
     }

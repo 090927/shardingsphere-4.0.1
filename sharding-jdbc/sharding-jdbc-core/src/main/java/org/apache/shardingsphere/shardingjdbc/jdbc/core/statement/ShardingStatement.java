@@ -111,6 +111,10 @@ public final class ShardingStatement extends AbstractStatementAdapter {
             initStatementExecutor();
 
             /**
+             * 执行引擎 {@link StatementExecutor#executeQuery()}
+             */
+
+            /**
              * 调用归并引擎 {@link MergeEngineFactory#newInstance(DatabaseType, ShardingRule, SQLRouteResult, RelationMetas, List)}
              */
             MergeEngine mergeEngine = MergeEngineFactory.newInstance(connection.getRuntimeContext().getDatabaseType(), 

@@ -59,6 +59,8 @@ public final class StatementExecutor extends AbstractStatementExecutor {
      * @throws SQLException SQL exception
      */
     public void init(final SQLRouteResult routeResult) throws SQLException {
+
+        // SqlStatementContext 上下文
         setSqlStatementContext(routeResult.getSqlStatementContext());
         getExecuteGroups().addAll(obtainExecuteGroups(routeResult.getRouteUnits()));
         cacheStatements();
@@ -92,15 +94,27 @@ public final class StatementExecutor extends AbstractStatementExecutor {
             
             @Override
             protected QueryResult executeSQL(final String sql, final Statement statement, final ConnectionMode connectionMode) throws SQLException {
+
+                /**
+                 *  [getQueryResult] {@link StatementExecutor#getQueryResult(String, Statement, ConnectionMode)}
+                 */
                 return getQueryResult(sql, statement, connectionMode);
             }
         };
+
+        /**
+         *  【core】 {@link AbstractStatementExecutor#executeCallback(SQLExecuteCallback)}
+         */
         return executeCallback(executeCallback);
     }
     
     private QueryResult getQueryResult(final String sql, final Statement statement, final ConnectionMode connectionMode) throws SQLException {
+
+        //通过 Statement 执行 SQL 并获取结果
         ResultSet resultSet = statement.executeQuery(sql);
         getResultSets().add(resultSet);
+
+        //根据连接模式来确认构建结果
         return ConnectionMode.MEMORY_STRICTLY == connectionMode ? new StreamQueryResult(resultSet) : new MemoryQueryResult(resultSet);
     }
     

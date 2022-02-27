@@ -56,12 +56,18 @@ public class MasterSlaveRule implements BaseRule {
         name = config.getName();
         masterDataSourceName = config.getMasterDataSourceName();
         slaveDataSourceNames = config.getSlaveDataSourceNames();
+
+        // 负载均衡-算法
         loadBalanceAlgorithm = createMasterSlaveLoadBalanceAlgorithm(config.getLoadBalanceStrategyConfiguration());
         ruleConfiguration = config;
     }
     
     private MasterSlaveLoadBalanceAlgorithm createMasterSlaveLoadBalanceAlgorithm(final LoadBalanceStrategyConfiguration loadBalanceStrategyConfiguration) {
+
+        //获取 MasterSlaveLoadBalanceAlgorithmServiceLoader
         MasterSlaveLoadBalanceAlgorithmServiceLoader serviceLoader = new MasterSlaveLoadBalanceAlgorithmServiceLoader();
+
+        // 根据配置来动态加载负载均衡算法实现类
         return null == loadBalanceStrategyConfiguration
                 ? serviceLoader.newService() : serviceLoader.newService(loadBalanceStrategyConfiguration.getType(), loadBalanceStrategyConfiguration.getProperties());
     }

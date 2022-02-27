@@ -20,8 +20,7 @@ package org.apache.shardingsphere.sharding.merge.dql.groupby;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import org.apache.shardingsphere.sharding.merge.dql.groupby.aggregation.AggregationUnit;
-import org.apache.shardingsphere.sharding.merge.dql.groupby.aggregation.AggregationUnitFactory;
+import org.apache.shardingsphere.sharding.merge.dql.groupby.aggregation.*;
 import org.apache.shardingsphere.sharding.merge.dql.orderby.OrderByStreamMergedResult;
 import org.apache.shardingsphere.sql.parser.core.constant.AggregationType;
 import org.apache.shardingsphere.sql.parser.relation.segment.select.projection.impl.AggregationDistinctProjection;
@@ -122,7 +121,9 @@ public final class GroupByStreamMergedResult extends OrderByStreamMergedResult {
             }
         }
 
-        // 设置当前记录的聚合字段结果
+        /**
+         * 设置当前记录的聚合字段结果 {@link #setAggregationValueToCurrentRow(Map)}
+         */
         setAggregationValueToCurrentRow(aggregationUnitMap);
         return result;
     }
@@ -138,7 +139,15 @@ public final class GroupByStreamMergedResult extends OrderByStreamMergedResult {
                 }
             }
 
-            // 计算聚合值
+            /**
+             * 计算聚合值 {@link AggregationUnit#merge(List)}
+             *      实现类
+             *        [max] {@link ComparableAggregationUnit#merge(List)}
+             *        [min] {@link ComparableAggregationUnit#merge(List)}
+             *        [sum] {@link DistinctSumAggregationUnit#merge(List)}
+             *        [count] {@link DistinctCountAggregationUnit#merge(List)}
+             *        [avg] {@link DistinctAverageAggregationUnit#merge(List)}
+             */
             entry.getValue().merge(values);
         }
     }
@@ -157,6 +166,16 @@ public final class GroupByStreamMergedResult extends OrderByStreamMergedResult {
     
     private void setAggregationValueToCurrentRow(final Map<AggregationProjection, AggregationUnit> aggregationUnitMap) {
         for (Entry<AggregationProjection, AggregationUnit> entry : aggregationUnitMap.entrySet()) {
+            /**
+             *  [result] {@link AggregationUnit#getResult()}
+             *      实现类
+             *        [max] {@link ComparableAggregationUnit#getResult()}
+             *        [min] {@link ComparableAggregationUnit#getResult()}
+             *        [sum] {@link DistinctSumAggregationUnit#getResult()}
+             *        [count] {@link DistinctCountAggregationUnit#getResult()}
+             *        [avg] {@link DistinctAverageAggregationUnit#getResult()}
+             *
+             */
             currentRow.set(entry.getKey().getIndex() - 1, entry.getValue().getResult());
         }
     }

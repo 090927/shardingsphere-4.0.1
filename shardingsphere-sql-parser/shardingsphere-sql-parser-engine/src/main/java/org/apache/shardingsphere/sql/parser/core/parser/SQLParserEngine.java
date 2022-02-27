@@ -84,7 +84,7 @@ public final class SQLParserEngine {
         /**
          * 获取配置文件的 SQLStatementRule {@link ParseRuleRegistry#getSQLStatementRule(String, String)}
          *
-         *  1、使用 `SQLStatementRule` 提取 SQL 片段
+         *  1、使用 `SQLStatementRule` 提取 SQL 片段。基于规则进行提取 'sql-statement-rule-definition.xml '
          */
         SQLStatementRule rule = parseRuleRegistry.getSQLStatementRule(databaseTypeName, parseTree.getClass().getSimpleName());
         if (null == rule) {

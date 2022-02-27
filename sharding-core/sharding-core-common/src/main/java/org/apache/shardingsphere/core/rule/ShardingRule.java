@@ -92,6 +92,8 @@ public class ShardingRule implements BaseRule {
         defaultDatabaseShardingStrategy = createDefaultShardingStrategy(shardingRuleConfig.getDefaultDatabaseShardingStrategyConfig());
         defaultTableShardingStrategy = createDefaultShardingStrategy(shardingRuleConfig.getDefaultTableShardingStrategyConfig());
         defaultShardingKeyGenerator = createDefaultKeyGenerator(shardingRuleConfig.getDefaultKeyGeneratorConfig());
+
+        // createMasterSlaveRules
         masterSlaveRules = createMasterSlaveRules(shardingRuleConfig.getMasterSlaveRuleConfigs());
         encryptRule = createEncryptRule(shardingRuleConfig.getEncryptRuleConfig());
     }
@@ -145,6 +147,10 @@ public class ShardingRule implements BaseRule {
     private Collection<MasterSlaveRule> createMasterSlaveRules(final Collection<MasterSlaveRuleConfiguration> masterSlaveRuleConfigurations) {
         Collection<MasterSlaveRule> result = new ArrayList<>(masterSlaveRuleConfigurations.size());
         for (MasterSlaveRuleConfiguration each : masterSlaveRuleConfigurations) {
+
+            /**
+             *  [MasterSlaveRule] {@link MasterSlaveRule#MasterSlaveRule(MasterSlaveRuleConfiguration)}
+             */
             result.add(new MasterSlaveRule(each));
         }
         return result;

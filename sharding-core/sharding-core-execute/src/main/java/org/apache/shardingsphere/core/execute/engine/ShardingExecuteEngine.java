@@ -83,7 +83,11 @@ public final class ShardingExecuteEngine implements AutoCloseable {
             return Collections.emptyList();
         }
 
-        // 串行执行
+        /**
+         *  串行、还是并行 serial
+         *     串行执行 {@link #serialExecute(Collection, ShardingGroupExecuteCallback, ShardingGroupExecuteCallback)}
+         *     并行执行 {@link #parallelExecute(Collection, ShardingGroupExecuteCallback, ShardingGroupExecuteCallback)}
+         */
         return serial ? serialExecute(inputGroups, firstCallback, callback) : parallelExecute(inputGroups, firstCallback, callback);
     }
 

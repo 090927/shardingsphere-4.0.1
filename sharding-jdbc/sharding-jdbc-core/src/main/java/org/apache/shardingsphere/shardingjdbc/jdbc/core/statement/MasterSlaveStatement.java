@@ -82,7 +82,9 @@ public final class MasterSlaveStatement extends AbstractStatementAdapter {
         // 清除 StatementExecutor 中的相关变量
         clearPrevious();
 
-        // 通过 MasterSlaveRouter 获取目标 DataSource
+        /**
+         * 通过 MasterSlaveRouter 获取目标 DataSource {@link MasterSlaveRouter#route(String, boolean)}
+         */
         Collection<String> dataSourceNames = masterSlaveRouter.route(sql, false);
         Preconditions.checkState(1 == dataSourceNames.size(), "Cannot support executeQuery for DML or DDL");
 
